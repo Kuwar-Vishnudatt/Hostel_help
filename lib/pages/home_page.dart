@@ -16,6 +16,20 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text(
+                  "POWER",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 119, 207, 246),
+                      fontSize: 30),
+                ),
+                IconButton(
+                  icon: Image.asset('assets/power_icon.jpg'),
+                  iconSize: 200,
+                  onPressed: () {
+                    // Handle power icon press
+                  },
+                ),
+                const Text(
                   "LAN",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -30,7 +44,7 @@ class HomePage extends StatelessWidget {
                   },
                 ),
                 const Text(
-                  "BATHROOM",
+                  "GENERAL",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 119, 207, 246),
@@ -41,20 +55,6 @@ class HomePage extends StatelessWidget {
                   iconSize: 200,
                   onPressed: () {
                     // Handle bathroom icon press
-                  },
-                ),
-                const Text(
-                  "POWER",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 119, 207, 246),
-                      fontSize: 30),
-                ),
-                IconButton(
-                  icon: Image.asset('assets/power_icon.jpg'),
-                  iconSize: 200,
-                  onPressed: () {
-                    // Handle power icon press
                   },
                 ),
               ],
