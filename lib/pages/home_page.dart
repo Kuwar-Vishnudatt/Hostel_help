@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
+import 'power_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  void _navigateToPowerPage() {
+    // use the Navigator.push method to push a new route
+    Navigator.push(
+      context,
+      // use the MaterialPageRoute class to create a route
+      MaterialPageRoute(
+        // use the PowerComplaintPage class as the builder of the route
+        builder: (context) => const PowerComplaintPage(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +44,7 @@ class HomePage extends StatelessWidget {
                   icon: Image.asset('assets/power_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
-                    // Handle power icon press
+                    _navigateToPowerPage(); // Handle power icon press
                   },
                 ),
                 const Text(
