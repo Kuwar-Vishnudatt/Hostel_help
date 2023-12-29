@@ -1,12 +1,12 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PowerComplaintPage extends StatefulWidget {
   const PowerComplaintPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _PowerComplaintPageState createState() => _PowerComplaintPageState();
 }
 
@@ -24,47 +24,105 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
   // create a text editing controller for the complaint field
   final _complaintController = TextEditingController();
 
+  // create a variable to store the number of complaints
+  int _numberOfComplaints = 0;
+
+  // create a variable to store the previous date
+  late DateTime _previousDate;
+
   // create a method to validate and submit the form
-  void _submitForm() {
-    // get the current state of the form
-    final form = _formKey.currentState;
+  void _submitForm() async {
+    // get the current date
+    DateTime currentDate = DateTime.now();
 
-    // check if the form is valid
-    if (form!.validate()) {
-      // save the form fields
-      form.save();
+    // check if the number of complaints is less than 2
+    if (_numberOfComplaints < 2) {
+      // get the current state of the form
+      final form = _formKey.currentState;
 
-      // get the input values
-      final name = _nameController.text;
-      final rollNumber = _rollNumberController.text;
-      final hostelNumber = _hostelNumberController.text;
-      final roomNumber = _roomNumberController.text;
-      final phoneNumber = _phoneNumberController.text;
-      final complaint = _complaintController.text;
+      // check if the form is valid
+      if (form!.validate()) {
+        // save the form fields
+        form.save();
 
-      // print the input values for debugging purposes
-      print("Name: $name");
-      print("Roll Number: $rollNumber");
-      print("Hostel Number: $hostelNumber");
-      print("Room Number: $roomNumber");
-      print("Phone Number: $phoneNumber");
-      print("Complaint: $complaint");
+        // get the input values
+        final name = _nameController.text;
+        final rollNumber = _rollNumberController.text;
+        final hostelNumber = _hostelNumberController.text;
+        final roomNumber = _roomNumberController.text;
+        final phoneNumber = _phoneNumberController.text;
+        final complaint = _complaintController.text;
 
-      // clear the input fields
-      _nameController.clear();
-      _rollNumberController.clear();
-      _hostelNumberController.clear();
-      _roomNumberController.clear();
-      _phoneNumberController.clear();
-      _complaintController.clear();
+        // print the input values for debugging purposes
+        print("Name: $name");
+        print("Roll Number: $rollNumber");
+        print("Hostel Number: $hostelNumber");
+        print("Room Number: $roomNumber");
+        print("Phone Number: $phoneNumber");
+        print("Complaint: $complaint");
 
-      // show a success message
+        // clear the input fields
+        _nameController.clear();
+        _rollNumberController.clear();
+        _hostelNumberController.clear();
+        _roomNumberController.clear();
+        _phoneNumberController.clear();
+        _complaintController.clear();
+
+        // increment the number of complaints by 1
+        _numberOfComplaints++;
+
+        // save the number of complaints and the current date to the SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setInt("numberOfComplaints", _numberOfComplaints);
+        prefs.setString("previousDate", currentDate.toString());
+
+        // show a success message
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Your complaint has been submitted."),
+          ),
+        );
+      }
+    } else {
+      // show a limit message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Your complaint has been submitted."),
+          content: Text(
+              "You have reached the limit of 2 complaints for the day. Please try again tomorrow."),
         ),
       );
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // get the previous date and the number of complaints from the SharedPreferences
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        // parse the previous date from the string
+        _previousDate = DateTime.parse(prefs.getString("previousDate") ?? "");
+
+        // get the current date
+        DateTime currentDate = DateTime.now();
+
+        // check if the previous date is equal to the current date
+        if (_previousDate.day == currentDate.day &&
+            _previousDate.month == currentDate.month &&
+            _previousDate.year == currentDate.year) {
+          // load the number of complaints
+          _numberOfComplaints = prefs.getInt("numberOfComplaints") ?? 0;
+        } else {
+          // reset the number of complaints to 0
+          _numberOfComplaints = 0;
+
+          // save the number of complaints to the SharedPreferences
+          prefs.setInt("numberOfComplaints", _numberOfComplaints);
+        }
+      });
+    });
   }
 
   @override
@@ -194,10 +252,11 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                 ),
                 const SizedBox(height: 16), // a vertical space of 16 pixels
                 ElevatedButton(
+                  onPressed: _submitForm, // the logic of the button
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue), // the color of the button
-                  onPressed: _submitForm,
-                  child: const Text("Submit"), // the logic of the button
+                    backgroundColor: Colors.blue, // the color of the button
+                  ),
+                  child: const Text("Submit"),
                 ),
               ],
             ),
