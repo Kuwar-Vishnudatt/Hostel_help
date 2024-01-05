@@ -1,5 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'power_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,6 +13,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
   void _navigateToPowerPage() {
     // use the Navigator.push method to push a new route
     Navigator.push(
@@ -21,12 +27,59 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _logout() async {
+    await _auth.signOut();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: const Color.fromARGB(248, 255, 255, 255),
         appBar: AppBar(
           title: const Text('Hostel Complaint Service'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logout,
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () async {
+                final user = _auth.currentUser;
+                if (user != null) {
+                  final userData =
+                      await _firestore.collection('users').doc(user.uid).get();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Profile'),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              Text('Name: ${userData['name']}'),
+                              Text('Roll: ${userData['roll']}'),
+                              Text('Hostel: ${userData['hostelNumber']}'),
+                              Text('Room Number: ${userData['roomNumber']}'),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: Center(
