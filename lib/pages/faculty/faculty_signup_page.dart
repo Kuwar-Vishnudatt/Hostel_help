@@ -1,24 +1,22 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, avoid_print
+// ignore_for_file: use_build_context_synchronously, avoid_print, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({super.key});
+class FacultySignupPage extends StatefulWidget {
+  const FacultySignupPage({super.key});
 
   @override
-  _SignupPageState createState() => _SignupPageState();
+  _FacultySignupPageState createState() => _FacultySignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _FacultySignupPageState extends State<FacultySignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  late String facultyType;
   late String name;
-  late String roll;
-  late String hostelNumber;
-  late String roomNumber;
   late String email;
   late String password;
 
@@ -29,13 +27,12 @@ class _SignupPageState extends State<SignupPage> {
         UserCredential userCredential = await _auth
             .createUserWithEmailAndPassword(email: email, password: password);
         User? user = userCredential.user;
-        await _firestore.collection('users').doc(user!.uid).set({
+        await _firestore.collection('faculty').doc(user!.uid).set({
+          'facultyType': facultyType,
           'name': name,
-          'roll': roll,
-          'hostelNumber': hostelNumber,
-          'roomNumber': roomNumber,
+          'email': email,
         });
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/facultyhome');
       } on FirebaseAuthException catch (e) {
         print(e.message);
       }
@@ -46,27 +43,25 @@ class _SignupPageState extends State<SignupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Signup Page'),
+        leading: IconButton(
+          icon: const BackButtonIcon(),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text('Faculty Signup'),
       ),
       body: Form(
         key: _formKey,
         child: Column(
           children: <Widget>[
             TextFormField(
+              decoration: const InputDecoration(labelText: 'Faculty Type'),
+              onSaved: (value) => facultyType = value!,
+            ),
+            TextFormField(
               decoration: const InputDecoration(labelText: 'Name'),
               onSaved: (value) => name = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Roll'),
-              onSaved: (value) => roll = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Hostel Number'),
-              onSaved: (value) => hostelNumber = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Room Number'),
-              onSaved: (value) => roomNumber = value!,
             ),
             TextFormField(
               decoration: const InputDecoration(labelText: 'Email'),
@@ -83,7 +78,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
             TextButton(
               onPressed: () =>
-                  Navigator.pushReplacementNamed(context, '/login'),
+                  Navigator.pushReplacementNamed(context, '/facultylogin'),
               child: const Text('Already have an account? Login'),
             ),
           ],

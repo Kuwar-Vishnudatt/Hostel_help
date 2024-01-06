@@ -1,23 +1,23 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unnecessary_null_comparison
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const MaterialApp(
-    home: LoginPage(),
+    home: UserLoginPage(),
   ));
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class UserLoginPage extends StatefulWidget {
+  const UserLoginPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _LoginPageState createState() => _LoginPageState();
+  _UserLoginPageState createState() => _UserLoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _UserLoginPageState extends State<UserLoginPage> {
   bool _obscureText = true;
   final _auth = FirebaseAuth.instance;
   late String email;
@@ -70,13 +70,18 @@ class _LoginPageState extends State<LoginPage> {
                     if (user != null) {
                       // Navigate to the next screen
                       // ignore: use_build_context_synchronously
-                      Navigator.pushReplacementNamed(context, '/home');
+                      Navigator.pushReplacementNamed(context, '/userhome');
                     }
                   } catch (e) {
                     print(e);
                   }
                 },
                 child: const Text('Login'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/usersignup'),
+                child: const Text("Don't have an account? Signup"),
               ),
             ],
           ),

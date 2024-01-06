@@ -1,18 +1,20 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'power_page.dart';
+import '../complaint/power_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+import 'user_complaint_page.dart';
+
+class UserHomePage extends StatefulWidget {
+  const UserHomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<UserHomePage> createState() => _UserHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _UserHomePageState extends State<UserHomePage> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   void _navigateToPowerPage() {
@@ -29,7 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   void _logout() async {
     await _auth.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
+    Navigator.pushReplacementNamed(context, '/userlogin');
   }
 
   @override
@@ -37,6 +39,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         backgroundColor: const Color.fromARGB(248, 255, 255, 255),
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: const Text('Hostel Complaint Service'),
           actions: <Widget>[
             IconButton(
@@ -70,6 +73,17 @@ class _HomePageState extends State<HomePage> {
                             child: const Text('OK'),
                             onPressed: () {
                               Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: const Text('View Complaints'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const UserComplaintsPage()),
+                              );
                             },
                           ),
                         ],

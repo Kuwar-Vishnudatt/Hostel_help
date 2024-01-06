@@ -1,8 +1,6 @@
 // ignore_for_file: avoid_print, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -28,6 +26,12 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const BackButtonIcon(),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         title: const Text('Power Complaint Page'),
       ),
       body: SafeArea(
@@ -113,6 +117,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                             'roomNumber': roomNumber,
                             'phoneNumber': phoneNumber,
                             'complaint': complaint,
+                            'seen': false,
                             'date': DateTime.now().toIso8601String(),
                           });
                           print('Complaint submitted successfully.');
