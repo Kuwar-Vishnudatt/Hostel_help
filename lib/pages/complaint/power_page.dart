@@ -58,13 +58,27 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                     roll = value;
                   },
                 ),
-                TextFormField(
+                InputDecorator(
                   decoration: const InputDecoration(
                     labelText: 'Hostel Number',
                   ),
-                  onChanged: (value) {
-                    hostelNumber = value;
-                  },
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: hostelNumber,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          hostelNumber = newValue!;
+                        });
+                      },
+                      items: <String>['BH1', 'BH2', 'BH3', 'GH']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
                 TextFormField(
                   decoration: const InputDecoration(
