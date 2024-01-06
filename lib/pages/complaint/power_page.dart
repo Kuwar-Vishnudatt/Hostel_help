@@ -118,6 +118,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                             'phoneNumber': phoneNumber,
                             'complaint': complaint,
                             'seen': false,
+                            'addressed': false,
                             'date': DateTime.now().toIso8601String(),
                           });
                           print('Complaint submitted successfully.');

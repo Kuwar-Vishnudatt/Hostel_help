@@ -17,7 +17,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
   final _firestore = FirebaseFirestore.instance;
   late String name;
   late String roll;
-  late String hostelNumber;
+  String hostelNumber = 'BH3';
   late String roomNumber;
   late String email;
   late String password;
@@ -45,56 +45,87 @@ class _UserSignupPageState extends State<UserSignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const BackButtonIcon(),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const BackButtonIcon(),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          title: const Text('Signup Page'),
         ),
-        title: const Text('Signup Page'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Name'),
-              onSaved: (value) => name = value!,
+        body: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  onSaved: (value) => name = value!,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Roll'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your roll number';
+                    }
+                    // Regex pattern for roll number
+                    String pattern = r'^(btech|bba|mtech|mba|bca)/\d{5}/\d{2}$';
+                    RegExp regex = RegExp(pattern);
+                    if (!regex.hasMatch(value)) {
+                      return 'Invalid roll number format';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => roll = value!,
+                ),
+                InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Hostel Number',
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: hostelNumber,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          hostelNumber = newValue!;
+                        });
+                      },
+                      items: <String>['BH1', 'BH2', 'BH3', 'GH']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Room Number'),
+                  onSaved: (value) => roomNumber = value!,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  onSaved: (value) => email = value!,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  onSaved: (value) => password = value!,
+                ),
+                ElevatedButton(
+                  onPressed: _signup,
+                  child: const Text('Signup'),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/userlogin'),
+                  child: const Text('Already have an account? Login'),
+                ),
+              ],
             ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Roll'),
-              onSaved: (value) => roll = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Hostel Number'),
-              onSaved: (value) => hostelNumber = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Room Number'),
-              onSaved: (value) => roomNumber = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Email'),
-              onSaved: (value) => email = value!,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-              onSaved: (value) => password = value!,
-            ),
-            ElevatedButton(
-              onPressed: _signup,
-              child: const Text('Signup'),
-            ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.pushReplacementNamed(context, '/userlogin'),
-              child: const Text('Already have an account? Login'),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 }

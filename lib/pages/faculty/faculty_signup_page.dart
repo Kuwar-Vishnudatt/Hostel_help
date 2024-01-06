@@ -15,7 +15,7 @@ class _FacultySignupPageState extends State<FacultySignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  late String facultyType;
+  String facultyType = 'Power';
   late String name;
   late String email;
   late String password;
@@ -31,6 +31,8 @@ class _FacultySignupPageState extends State<FacultySignupPage> {
           'facultyType': facultyType,
           'name': name,
           'email': email,
+          'seen': false,
+          'addressed': false,
         });
         Navigator.pushReplacementNamed(context, '/facultyhome');
       } on FirebaseAuthException catch (e) {
@@ -55,9 +57,27 @@ class _FacultySignupPageState extends State<FacultySignupPage> {
         key: _formKey,
         child: Column(
           children: <Widget>[
-            TextFormField(
-              decoration: const InputDecoration(labelText: 'Faculty Type'),
-              onSaved: (value) => facultyType = value!,
+            InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Faculty Type',
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: facultyType,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      facultyType = newValue!;
+                    });
+                  },
+                  items: <String>['Power', 'LAN', 'General']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
             ),
             TextFormField(
               decoration: const InputDecoration(labelText: 'Name'),
