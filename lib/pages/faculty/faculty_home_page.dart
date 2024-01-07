@@ -15,6 +15,27 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
 
+  late String facultyType;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFacultyType();
+  }
+
+  void fetchFacultyType() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userData = await FirebaseFirestore.instance
+          .collection('faculty')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        facultyType = userData['facultyType'];
+      });
+    }
+  }
+
   void _logout() async {
     await _auth.signOut();
     Navigator.pushReplacementNamed(context, '/facultylogin');
@@ -40,15 +61,26 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             ),
           ]),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('complaints').snapshots(),
+        stream: _firestore
+            .collection('complaints')
+            .orderBy('date', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (facultyType == null || facultyType.isEmpty) {
+            return const Center(child: Text('No faculty type found.'));
+          }
+          List<DocumentSnapshot> complaints =
+              snapshot.data!.docs.where((complaint) {
+            String complaintType = complaint['type'];
+            return complaintType == facultyType;
+          }).toList();
           return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
+            itemCount: complaints.length,
             itemBuilder: (context, index) {
-              DocumentSnapshot complaint = snapshot.data!.docs[index];
+              DocumentSnapshot complaint = complaints[index];
               bool seen =
                   (complaint.data() as Map<String, dynamic>).containsKey('seen')
                       ? complaint['seen']
@@ -69,6 +101,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                               'Room Number: ${complaint['roomNumber']}\n'
                               'Phone Number: ${complaint['phoneNumber']}\n'
                               'Complaint: ${complaint['complaint']}\n'
+                              'date: ${_formatTimestamp(complaint['date'])}\n'
                               'Addressed: '),
                       TextSpan(
                         text: '${addressed ? 'Yes' : 'No'}',
@@ -90,5 +123,16 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
         },
       ),
     );
+  }
+
+  _formatTimestamp(String timestamp) {
+    if (timestamp != null && timestamp.isNotEmpty) {
+      DateTime dateTime = DateTime.parse(timestamp); // Parse string to DateTime
+      String formattedDate =
+          '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
+      return ': $formattedDate'; // Display the formatted DateTime
+    } else {
+      return ': No timestamp';
+    }
   }
 }

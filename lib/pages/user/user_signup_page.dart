@@ -21,6 +21,10 @@ class _UserSignupPageState extends State<UserSignupPage> {
   late String roomNumber;
   late String email;
   late String password;
+  final RegExp emailRegex = RegExp(
+    r"^(btech|bba|mba|mtech|bca|mca)\d{5}\.\d{2}@bitmesra\.ac\.in$",
+    caseSensitive: false,
+  );
 
   void _signup() async {
     if (_formKey.currentState!.validate()) {
@@ -107,6 +111,12 @@ class _UserSignupPageState extends State<UserSignupPage> {
                 ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || !emailRegex.hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                   onSaved: (value) => email = value!,
                 ),
                 TextFormField(

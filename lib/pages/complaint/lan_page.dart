@@ -22,7 +22,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
   late String phoneNumber;
   late String complaint;
   final timestamp = DateTime.now().toIso8601String();
-  String type = 'Power';
+  String type = 'LAN';
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Text('Power Complaint Page'),
+        title: const Text('Lan Complaint Page'),
       ),
       body: SafeArea(
         child: Padding(
