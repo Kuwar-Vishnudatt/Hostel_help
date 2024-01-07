@@ -22,9 +22,10 @@ class _UserSignupPageState extends State<UserSignupPage> {
   late String email;
   late String password;
   final RegExp emailRegex = RegExp(
-    r"^(btech|bba|mba|mtech|bca|mca)\d{5}\.\d{2}@bitmesra\.ac\.in$",
+    r"^(btech|BTECH|bba|BBA|mba|MBA|mtech|MTECH|bca|BCA|mca|MCA)\d{5}\.\d{2}@bitmesra\.ac\.in$",
     caseSensitive: false,
   );
+
   bool _obscureText = true;
 
   void _signup() async {
