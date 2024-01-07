@@ -73,6 +73,58 @@ class _UserSignupPageState extends State<UserSignupPage> {
               ),
               // Other form fields...
               TextFormField(
+                decoration: const InputDecoration(labelText: 'Roll'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your roll number';
+                  }
+                  // Regex pattern for roll number
+                  String pattern = r'^(btech|bba|mtech|mba|bca)/\d{5}/\d{2}$';
+                  RegExp regex = RegExp(pattern);
+                  if (!regex.hasMatch(value)) {
+                    return 'Invalid roll number format';
+                  }
+                  return null;
+                },
+                onSaved: (value) => roll = value!,
+              ),
+              InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Hostel Number',
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: hostelNumber,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        hostelNumber = newValue!;
+                      });
+                    },
+                    items: <String>['BH1', 'BH2', 'BH3', 'GH']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Room Number'),
+                onSaved: (value) => roomNumber = value!,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || !emailRegex.hasMatch(value)) {
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
+                onSaved: (value) => email = value!,
+              ),
+              TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Password',
                   suffixIcon: IconButton(
