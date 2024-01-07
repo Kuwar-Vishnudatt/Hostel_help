@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PowerComplaintPage extends StatefulWidget {
-  const PowerComplaintPage({super.key});
+class GeneralComplaintPage extends StatefulWidget {
+  const GeneralComplaintPage({super.key});
 
   @override
-  _PowerComplaintPageState createState() => _PowerComplaintPageState();
+  _GeneralComplaintPageState createState() => _GeneralComplaintPageState();
 }
 
-class _PowerComplaintPageState extends State<PowerComplaintPage> {
+class _GeneralComplaintPageState extends State<GeneralComplaintPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;

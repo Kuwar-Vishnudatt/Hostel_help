@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FacultySignupPage extends StatefulWidget {
-  const FacultySignupPage({super.key});
+  const FacultySignupPage({Key? key});
 
   @override
   _FacultySignupPageState createState() => _FacultySignupPageState();
@@ -19,13 +19,17 @@ class _FacultySignupPageState extends State<FacultySignupPage> {
   late String name;
   late String email;
   late String password;
+  bool _obscureText = true;
 
   void _signup() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       try {
-        UserCredential userCredential = await _auth
-            .createUserWithEmailAndPassword(email: email, password: password);
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
         User? user = userCredential.user;
         await _firestore.collection('faculty').doc(user!.uid).set({
           'facultyType': facultyType,
@@ -88,8 +92,20 @@ class _FacultySignupPageState extends State<FacultySignupPage> {
               onSaved: (value) => email = value!,
             ),
             TextFormField(
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                ),
+              ),
+              obscureText: _obscureText,
               onSaved: (value) => password = value!,
             ),
             ElevatedButton(

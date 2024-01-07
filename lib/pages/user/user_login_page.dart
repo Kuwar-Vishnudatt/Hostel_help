@@ -23,6 +23,19 @@ class _UserLoginPageState extends State<UserLoginPage> {
   late String email;
   late String password;
 
+  void _resetPassword() async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      // Provide feedback to the user that a password reset email has been sent
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent')),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +90,10 @@ class _UserLoginPageState extends State<UserLoginPage> {
                   }
                 },
                 child: const Text('Login'),
+              ),
+              TextButton(
+                onPressed: _resetPassword,
+                child: const Text('Forgot Password?'),
               ),
               TextButton(
                 onPressed: () =>

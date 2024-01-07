@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserComplaintsPage extends StatefulWidget {
-  const UserComplaintsPage({super.key});
+  const UserComplaintsPage({Key? key});
 
   @override
   _UserComplaintsPageState createState() => _UserComplaintsPageState();
@@ -20,6 +20,10 @@ class _UserComplaintsPageState extends State<UserComplaintsPage> {
         .collection('complaints')
         .doc(complaint.id)
         .update({'addressed': true});
+  }
+
+  void _deleteComplaint(DocumentSnapshot complaint) async {
+    await _firestore.collection('complaints').doc(complaint.id).delete();
   }
 
   @override
@@ -45,7 +49,7 @@ class _UserComplaintsPageState extends State<UserComplaintsPage> {
                       .containsKey('addressed')
                   ? complaint['addressed']
                   : false;
-              // ignore: unused_local_variable
+
               bool seen =
                   (complaint.data() as Map<String, dynamic>).containsKey('seen')
                       ? complaint['seen']
@@ -68,13 +72,24 @@ class _UserComplaintsPageState extends State<UserComplaintsPage> {
                     ],
                   ),
                 ),
-                trailing: Checkbox(
-                  value: addressed,
-                  onChanged: (bool? newValue) {
-                    if (newValue != null) {
-                      _markAsAddressed(complaint);
-                    }
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      value: addressed,
+                      onChanged: (bool? newValue) {
+                        if (newValue != null) {
+                          _markAsAddressed(complaint);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _deleteComplaint(complaint);
+                      },
+                    ),
+                  ],
                 ),
               );
             },

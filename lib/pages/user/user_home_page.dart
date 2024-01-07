@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import '../complaint/general_page.dart';
+import '../complaint/lan_page.dart';
 import '../complaint/power_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,6 +27,30 @@ class _UserHomePageState extends State<UserHomePage> {
       MaterialPageRoute(
         // use the PowerComplaintPage class as the builder of the route
         builder: (context) => const PowerComplaintPage(),
+      ),
+    );
+  }
+
+  void _navigateToLanPage() {
+    // use the Navigator.push method to push a new route
+    Navigator.push(
+      context,
+      // use the MaterialPageRoute class to create a route
+      MaterialPageRoute(
+        // use the PowerComplaintPage class as the builder of the route
+        builder: (context) => const LanComplaintPage(),
+      ),
+    );
+  }
+
+  void _navigateToGeneralPage() {
+    // use the Navigator.push method to push a new route
+    Navigator.push(
+      context,
+      // use the MaterialPageRoute class to create a route
+      MaterialPageRoute(
+        // use the PowerComplaintPage class as the builder of the route
+        builder: (context) => const GeneralComplaintPage(),
       ),
     );
   }
@@ -125,6 +151,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   icon: Image.asset('assets/lan_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
+                    _navigateToLanPage();
                     // Handle LAN icon press
                   },
                 ),
@@ -139,6 +166,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   icon: Image.asset('assets/bathroom_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
+                    _navigateToGeneralPage();
                     // Handle bathroom icon press
                   },
                 ),
