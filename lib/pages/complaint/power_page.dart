@@ -114,7 +114,8 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                     if (_formKey.currentState!.validate()) {
                       // If the form is valid, display a Snackbar and send the complaint to the other frontend
                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing Data')));
+                        const SnackBar(content: Text('Processing Data')),
+                      );
                       // Send the complaint to the other frontend
                       final user = _auth.currentUser;
                       final timestamp = DateTime.now().toIso8601String();
@@ -144,6 +145,11 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                               'You have already submitted a complaint today.');
                         }
                       }
+                      // Clear the form fields
+                      _formKey.currentState!.reset();
+                      // Navigate back to the UserHomePage
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).pop();
                     }
                   },
                   child: const Text('Submit'),
