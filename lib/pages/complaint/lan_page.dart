@@ -118,12 +118,17 @@ class _LanComplaintPageState extends State<LanComplaintPage> {
                       );
                       // Send the complaint to the other frontend
                       final user = _auth.currentUser;
-                      final timestamp = DateTime.now().toIso8601String();
+                      final todayDate = DateTime.now();
+                      final timestamp = DateTime(
+                              todayDate.year, todayDate.month, todayDate.day)
+                          .toIso8601String();
+
                       if (user != null) {
                         final complaints = await _firestore
                             .collection('complaints')
                             .where('userId', isEqualTo: user.uid)
                             .where('date', isEqualTo: timestamp)
+                            .where('type', isEqualTo: type)
                             .get();
                         if (complaints.docs.isEmpty) {
                           await _firestore.collection('complaints').add({
@@ -139,14 +144,21 @@ class _LanComplaintPageState extends State<LanComplaintPage> {
                             'date': timestamp,
                             'type': type,
                           });
-                          print('Complaint submitted successfully.');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Complaint registered')),
+                          );
+                          _formKey.currentState!.reset();
                         } else {
-                          print(
-                              'You have already submitted a complaint today.');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Already submitted a complaint today')),
+                          );
+                          _formKey.currentState!.reset();
                         }
                       }
                       // Clear the form fields
-                      _formKey.currentState!.reset();
                       // Navigate back to the UserHomePage
                       // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();

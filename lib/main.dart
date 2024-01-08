@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_help/pages/faculty/faculty_home_page.dart';
 import 'package:hostel_help/pages/faculty/faculty_login_page.dart';
-import 'package:hostel_help/pages/faculty/faculty_signup_page.dart';
+// import 'package:hostel_help/pages/faculty/faculty_signup_page.dart';
 import 'package:hostel_help/pages/user/user_login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hostel_help/pages/user/user_signup_page.dart';
@@ -21,7 +21,7 @@ void main() async {
       '/userhome': (context) => const UserHomePage(),
       '/facultyhome': (context) => const FacultyHomePage(),
       '/usersignup': (context) => const UserSignupPage(),
-      '/facultysignup': (context) => const FacultySignupPage(),
+      // '/facultysignup': (context) => const FacultySignupPage(),
       '/facultylogin': (context) => const FacultyLoginPage(),
     },
   ));

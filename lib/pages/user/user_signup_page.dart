@@ -38,13 +38,32 @@ class _UserSignupPageState extends State<UserSignupPage> {
           password: password,
         );
         User? user = userCredential.user;
-        await _firestore.collection('users').doc(user!.uid).set({
+
+        // Send email verification
+        await user!.sendEmailVerification();
+
+        // Show a Snackbar to check email and login
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check your email for verification.'),
+          ),
+        );
+
+// Save user details to Firestore
+        await _firestore.collection('users').doc(user.uid).set({
           'name': name,
           'roll': roll,
           'hostelNumber': hostelNumber,
           'roomNumber': roomNumber,
+          // Add other fields as needed
         });
-        Navigator.pushReplacementNamed(context, '/userhome');
+
+        // Clear the signup page
+        _formKey.currentState!.reset();
+
+        // Navigate back to login or home page
+        // Replace '/userhome' with the appropriate route
+        Navigator.pushReplacementNamed(context, '/userlogin');
       } on FirebaseAuthException catch (e) {
         print(e.message);
       }
