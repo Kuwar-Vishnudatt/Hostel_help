@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:hostel_help/pages/complaint/discipline_page.dart';
 import '../complaint/general_page.dart';
 import '../complaint/lan_page.dart';
 import '../complaint/power_page.dart';
@@ -51,6 +52,18 @@ class _UserHomePageState extends State<UserHomePage> {
       MaterialPageRoute(
         // use the PowerComplaintPage class as the builder of the route
         builder: (context) => const GeneralComplaintPage(),
+      ),
+    );
+  }
+
+  void _navigateToDisciplinePage() {
+    // use the Navigator.push method to push a new route
+    Navigator.push(
+      context,
+      // use the MaterialPageRoute class to create a route
+      MaterialPageRoute(
+        // use the PowerComplaintPage class as the builder of the route
+        builder: (context) => const DisciplineComplaintPage(),
       ),
     );
   }
@@ -134,7 +147,7 @@ class _UserHomePageState extends State<UserHomePage> {
                       fontSize: 30),
                 ),
                 IconButton(
-                  icon: Image.asset('assets/power_icon.jpg'),
+                  icon: Image.asset('assets/images/power_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
                     _navigateToPowerPage(); // Handle power icon press
@@ -148,7 +161,7 @@ class _UserHomePageState extends State<UserHomePage> {
                       fontSize: 30),
                 ),
                 IconButton(
-                  icon: Image.asset('assets/lan_icon.jpg'),
+                  icon: Image.asset('assets/images/lan_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
                     _navigateToLanPage();
@@ -163,10 +176,25 @@ class _UserHomePageState extends State<UserHomePage> {
                       fontSize: 30),
                 ),
                 IconButton(
-                  icon: Image.asset('assets/bathroom_icon.jpg'),
+                  icon: Image.asset('assets/images/bathroom_icon.jpg'),
                   iconSize: 200,
                   onPressed: () {
                     _navigateToGeneralPage();
+                    // Handle bathroom icon press
+                  },
+                ),
+                const Text(
+                  "DISCIPLINARY ACTION",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 119, 207, 246),
+                      fontSize: 30),
+                ),
+                IconButton(
+                  icon: Image.asset('assets/images/discipline_icon.jpg'),
+                  iconSize: 200,
+                  onPressed: () {
+                    _navigateToDisciplinePage();
                     // Handle bathroom icon press
                   },
                 ),

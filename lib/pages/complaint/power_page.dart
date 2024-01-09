@@ -44,52 +44,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
             child: Column(
               children: <Widget>[
                 // Add your input fields here
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                  ),
-                  onChanged: (value) {
-                    name = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Roll',
-                  ),
-                  onChanged: (value) {
-                    roll = value;
-                  },
-                ),
-                InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Hostel Number',
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: hostelNumber,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          hostelNumber = newValue!;
-                        });
-                      },
-                      items: <String>['BH1', 'BH2', 'BH3', 'GH']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Room Number',
-                  ),
-                  onChanged: (value) {
-                    roomNumber = value;
-                  },
-                ),
+
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Phone Number',
@@ -97,6 +52,16 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                   keyboardType: TextInputType.phone,
                   onChanged: (value) {
                     phoneNumber = value;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    // Phone number regex validation
+                    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                      return 'Please enter a valid 10-digit phone number';
+                    }
+                    return null;
                   },
                 ),
                 TextFormField(
@@ -124,12 +89,22 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                           .toIso8601String();
 
                       if (user != null) {
+                        final userData = await _firestore
+                            .collection('users')
+                            .doc(user.uid)
+                            .get();
+                        final name = userData['name'];
+                        final roll = userData['roll'];
+                        final hostelNumber = userData['hostelNumber'];
+                        final roomNumber = userData['roomNumber'];
+
                         final complaints = await _firestore
                             .collection('complaints')
                             .where('userId', isEqualTo: user.uid)
                             .where('date', isEqualTo: timestamp)
                             .where('type', isEqualTo: type)
                             .get();
+
                         if (complaints.docs.isEmpty) {
                           await _firestore.collection('complaints').add({
                             'userId': user.uid,

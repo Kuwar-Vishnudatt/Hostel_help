@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class LanComplaintPage extends StatefulWidget {
-  const LanComplaintPage({super.key});
+class DisciplineComplaintPage extends StatefulWidget {
+  const DisciplineComplaintPage({super.key});
 
   @override
-  _LanComplaintPageState createState() => _LanComplaintPageState();
+  _DisciplineComplaintPageState createState() =>
+      _DisciplineComplaintPageState();
 }
 
-class _LanComplaintPageState extends State<LanComplaintPage> {
+class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
@@ -22,7 +23,7 @@ class _LanComplaintPageState extends State<LanComplaintPage> {
   late String phoneNumber;
   late String complaint;
   final timestamp = DateTime.now().toIso8601String();
-  String type = 'LAN';
+  String type = 'Discipline';
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class _LanComplaintPageState extends State<LanComplaintPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Text('Lan Complaint Page'),
+        title: const Text('Disciplinary Action'),
       ),
       body: SafeArea(
         child: Padding(
@@ -44,6 +45,7 @@ class _LanComplaintPageState extends State<LanComplaintPage> {
             child: Column(
               children: <Widget>[
                 // Add your input fields here
+
                 TextFormField(
                   decoration: const InputDecoration(
                     labelText: 'Phone Number',

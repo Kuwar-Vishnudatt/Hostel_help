@@ -56,6 +56,42 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
           title: const Text('Faculty Home Page'),
           actions: <Widget>[
             IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () async {
+                final user = _auth.currentUser;
+                if (user != null) {
+                  final userData = await _firestore
+                      .collection('faculty')
+                      .doc(user.uid)
+                      .get();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Profile'),
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              Text('Name: ${userData['name']}'),
+                              Text('Type: ${userData['facultyType']}'),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logout,
             ),
