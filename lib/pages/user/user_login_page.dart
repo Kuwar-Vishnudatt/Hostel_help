@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'user_home_page.dart';
+
 void main() {
   runApp(const MaterialApp(
     home: UserLoginPage(),
@@ -39,8 +41,16 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Hostel Help Login'),
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'User Login',
+          style: TextStyle(
+              color: Color.fromARGB(255, 255, 255, 255),
+              fontWeight: FontWeight.bold,
+              backgroundColor: Colors.black87),
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -48,26 +58,58 @@ class _UserLoginPageState extends State<UserLoginPage> {
           child: Column(
             children: <Widget>[
               TextField(
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Email',
+                  labelStyle: TextStyle(
+                      color: Colors.white), // Set label color to white
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Colors.white), // Set border color to white
+                    borderRadius:
+                        BorderRadius.circular(10.0), // Set border radius
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            Colors.white), // Set focused border color to white
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Set focused border radius
+                  ),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 onChanged: (value) {
                   email = value;
                 },
               ),
+              SizedBox(height: 10.0),
               TextField(
                 decoration: InputDecoration(
                   labelText: 'Password',
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.white, // Set icon color to white
                     ),
                     onPressed: () {
                       setState(() {
                         _obscureText = !_obscureText;
                       });
                     },
+                  ),
+                  labelStyle: TextStyle(
+                      color: Colors.white), // Set label color to white
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Colors.white), // Set border color to white
+                    borderRadius:
+                        BorderRadius.circular(10.0), // Set border radius
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            Colors.white), // Set focused border color to white
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Set focused border radius
                   ),
                 ),
                 obscureText: _obscureText,
@@ -83,23 +125,39 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     if (user != null) {
                       // Navigate to the next screen
                       // ignore: use_build_context_synchronously
-                      Navigator.pushReplacementNamed(context, '/userhome');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UserHomePage()),
+                      );
                     }
                   } catch (e) {
                     print(e);
                   }
                 },
-                child: const Text('Login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      Color.fromARGB(255, 27, 27, 27), // Dark grey color
+                ),
+                child: const Text(
+                  'Login',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               TextButton(
                 onPressed: _resetPassword,
-                child: const Text('Forgot Password?'),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent, // No background color
+                  foregroundColor: Colors.white, // White color
+                ),
+                child: const Text(
+                  'Forgot Password?',
+                ),
               ),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/usersignup'),
-                child: const Text("Don't have an account? Signup"),
-              ),
+              // TextButton(
+              //   onPressed: () =>
+              //       Navigator.pushReplacementNamed(context, '/usersignup'),
+              //   child: const Text("Don't have an account? Signup"),
+              // ),
             ],
           ),
         ),

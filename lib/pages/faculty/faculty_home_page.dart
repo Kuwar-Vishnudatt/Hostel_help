@@ -1,5 +1,5 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, unnecessary_string_interpolations
-
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,13 +14,51 @@ class FacultyHomePage extends StatefulWidget {
 class _FacultyHomePageState extends State<FacultyHomePage> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-
   late String facultyType;
-
   @override
   void initState() {
     super.initState();
+    BackButtonInterceptor.add(myInterceptor);
     fetchFacultyType();
+  }
+
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
+  }
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Do you want to logout?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Continue with the default back button behavior
+              stopDefaultButtonEvent =
+                  false; // Use this instead of BackButtonInterceptor.shouldPopRoute
+            },
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              _logout(context);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+
+    // Prevent the default back button behavior
+    stopDefaultButtonEvent =
+        true; // Use this instead of BackButtonInterceptor.shouldPopRoute
+    return true;
   }
 
   void fetchFacultyType() async {
@@ -36,9 +74,9 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
     }
   }
 
-  void _logout() async {
+  void _logout(BuildContext context) async {
     await _auth.signOut();
-    Navigator.pushReplacementNamed(context, '/facultylogin');
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   void _markAsSeen(DocumentSnapshot complaint) async {
@@ -93,7 +131,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             ),
             IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: _logout,
+              onPressed: () => _logout(context),
             ),
           ]),
       body: StreamBuilder<QuerySnapshot>(

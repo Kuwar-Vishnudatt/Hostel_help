@@ -1,5 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
-
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_help/pages/complaint/discipline_page.dart';
 import '../complaint/general_page.dart';
@@ -10,8 +10,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'user_complaint_page.dart';
 
+import 'package:carousel_slider/carousel_slider.dart';
+
+// Import your power, lan, general, and disciplinary action pages here
+
+MaterialColor createMaterialColor(Color color) {
+  List<double> strengths = <double>[.05];
+  Map<int, Color> swatch = {};
+  final int r = color.red, g = color.green, b = color.blue;
+
+  for (int i = 1; i < 10; i++) {
+    strengths.add(0.1 * i);
+  }
+  for (var strength in strengths) {
+    final double ds = 0.5 - strength;
+    swatch[(strength * 1000).round()] = Color.fromRGBO(
+      r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+      g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+      b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+      1,
+    );
+  }
+  return MaterialColor(color.value, swatch);
+}
+
+void main() {
+  runApp(UserHomePage());
+}
+
 class UserHomePage extends StatefulWidget {
-  const UserHomePage({super.key});
+  UserHomePage({Key? key}) : super(key: key);
 
   @override
   State<UserHomePage> createState() => _UserHomePageState();
@@ -19,71 +47,84 @@ class UserHomePage extends StatefulWidget {
 
 class _UserHomePageState extends State<UserHomePage> {
   final _auth = FirebaseAuth.instance;
+
   final _firestore = FirebaseFirestore.instance;
-  void _navigateToPowerPage() {
-    // use the Navigator.push method to push a new route
-    Navigator.push(
-      context,
-      // use the MaterialPageRoute class to create a route
-      MaterialPageRoute(
-        // use the PowerComplaintPage class as the builder of the route
-        builder: (context) => const PowerComplaintPage(),
-      ),
-    );
+
+  @override
+  void initState() {
+    super.initState();
+    BackButtonInterceptor.add(myInterceptor);
   }
 
-  void _navigateToLanPage() {
-    // use the Navigator.push method to push a new route
-    Navigator.push(
-      context,
-      // use the MaterialPageRoute class to create a route
-      MaterialPageRoute(
-        // use the PowerComplaintPage class as the builder of the route
-        builder: (context) => const LanComplaintPage(),
-      ),
-    );
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
   }
 
-  void _navigateToGeneralPage() {
-    // use the Navigator.push method to push a new route
-    Navigator.push(
-      context,
-      // use the MaterialPageRoute class to create a route
-      MaterialPageRoute(
-        // use the PowerComplaintPage class as the builder of the route
-        builder: (context) => const GeneralComplaintPage(),
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Do you want to logout?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Continue with the default back button behavior
+              stopDefaultButtonEvent =
+                  false; // Use this instead of BackButtonInterceptor.shouldPopRoute
+            },
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              _logout(context);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Yes'),
+          ),
+        ],
       ),
     );
+
+    // Prevent the default back button behavior
+    stopDefaultButtonEvent =
+        true; // Use this instead of BackButtonInterceptor.shouldPopRoute
+    return true;
   }
 
-  void _navigateToDisciplinePage() {
-    // use the Navigator.push method to push a new route
-    Navigator.push(
-      context,
-      // use the MaterialPageRoute class to create a route
-      MaterialPageRoute(
-        // use the PowerComplaintPage class as the builder of the route
-        builder: (context) => const DisciplineComplaintPage(),
-      ),
-    );
-  }
-
-  void _logout() async {
+  void _logout(BuildContext context) async {
     await _auth.signOut();
-    Navigator.pushReplacementNamed(context, '/userlogin');
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: const Color.fromARGB(248, 255, 255, 255),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: createMaterialColor(Color.fromARGB(255, 255, 255, 255)),
+      ),
+      home: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 0, 0, 0),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('Hostel Complaint Service'),
+          title: Center(
+            child: const Text(
+              'HOSTEL HELP',
+              style: TextStyle(
+                  color: Color.fromARGB(255, 255, 255, 255),
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: _logout,
+              onPressed: () => _logout(context),
             ),
             IconButton(
               icon: const Icon(Icons.account_circle),
@@ -135,72 +176,144 @@ class _UserHomePageState extends State<UserHomePage> {
           ],
         ),
         body: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  "POWER",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 119, 207, 246),
-                      fontSize: 30),
+            child: IconSlider(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class IconSlider extends StatefulWidget {
+  const IconSlider({Key? key}) : super(key: key);
+
+  @override
+  _IconSliderState createState() => _IconSliderState();
+}
+
+class _IconSliderState extends State<IconSlider> {
+  int _current = 0;
+  bool _showPower = true;
+  bool _showLan = false;
+  bool _showGeneral = false;
+  bool _showDiscipline = false;
+
+  final List<String> imgList = [
+    'assets/images/power_icon.jpg',
+    'assets/images/lan_icon.jpg',
+    'assets/images/bathroom_icon.jpg',
+    'assets/images/discipline_icon.jpg',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 400,
+            aspectRatio: 16 / 9,
+            viewportFraction: 0.5,
+            initialPage: 0,
+            enableInfiniteScroll: true,
+            reverse: false,
+            autoPlay: false,
+            enlargeCenterPage: true,
+            scrollDirection: Axis.horizontal,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _current = index;
+                _showPower = index == 0;
+                _showLan = index == 1;
+                _showGeneral = index == 2;
+                _showDiscipline = index == 3;
+              });
+            },
+          ),
+          items: imgList.map((item) {
+            int index = imgList.indexOf(item);
+            String label;
+            switch (index) {
+              case 0:
+                label = 'POWER';
+                break;
+              case 1:
+                label = 'LAN';
+                break;
+              case 2:
+                label = 'GENERAL';
+                break;
+              case 3:
+                label = 'DISCIPLINARY ACTION';
+                break;
+              default:
+                label = '';
+            }
+            return Column(
+              children: [
+                Container(
+                  child: Center(
+                    child: ClipOval(
+                      child: Image.asset(item, fit: BoxFit.cover, width: 1000),
+                    ),
+                  ),
                 ),
-                IconButton(
-                  icon: Image.asset('assets/images/power_icon.jpg'),
-                  iconSize: 200,
-                  onPressed: () {
-                    _navigateToPowerPage(); // Handle power icon press
-                  },
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const Text(
-                  "LAN",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 119, 207, 248),
-                      fontSize: 30),
-                ),
-                IconButton(
-                  icon: Image.asset('assets/images/lan_icon.jpg'),
-                  iconSize: 200,
-                  onPressed: () {
-                    _navigateToLanPage();
-                    // Handle LAN icon press
-                  },
-                ),
-                const Text(
-                  "GENERAL",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 119, 207, 246),
-                      fontSize: 30),
-                ),
-                IconButton(
-                  icon: Image.asset('assets/images/bathroom_icon.jpg'),
-                  iconSize: 200,
-                  onPressed: () {
-                    _navigateToGeneralPage();
-                    // Handle bathroom icon press
-                  },
-                ),
-                const Text(
-                  "DISCIPLINARY ACTION",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 119, 207, 246),
-                      fontSize: 30),
-                ),
-                IconButton(
-                  icon: Image.asset('assets/images/discipline_icon.jpg'),
-                  iconSize: 200,
-                  onPressed: () {
-                    _navigateToDisciplinePage();
-                    // Handle bathroom icon press
-                  },
+                Container(
+                  width: 8.0,
+                  height: 8.0,
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 2.0,
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _current == index
+                        ? Color.fromARGB(255, 255, 255, 255)
+                        : Color.fromARGB(255, 104, 103, 103),
+                  ),
                 ),
               ],
+            );
+          }).toList(),
+        ),
+        SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, -1),
+            end: const Offset(0, 0),
+          ).animate(
+            CurvedAnimation(
+              parent: _showPower || _showLan || _showGeneral || _showDiscipline
+                  ? const AlwaysStoppedAnimation(1)
+                  : const AlwaysStoppedAnimation(0),
+              curve: Curves.easeInOut,
             ),
           ),
-        ));
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            height: _showPower || _showLan || _showGeneral || _showDiscipline
+                ? MediaQuery.of(context).size.height
+                : 0,
+            child: _showPower
+                ? PowerComplaintPage()
+                : _showLan
+                    ? LanComplaintPage()
+                    : _showGeneral
+                        ? GeneralComplaintPage()
+                        : _showDiscipline
+                            ? DisciplineComplaintPage()
+                            : Container(),
+          ),
+        ),
+      ],
+    );
   }
 }

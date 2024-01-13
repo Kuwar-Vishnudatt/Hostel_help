@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'user_home_page.dart';
+
 class UserSignupPage extends StatefulWidget {
   const UserSignupPage({Key? key});
 
@@ -49,7 +51,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
           ),
         );
 
-// Save user details to Firestore
+        // Save user details to Firestore
         await _firestore.collection('users').doc(user.uid).set({
           'name': name,
           'roll': roll,
@@ -63,7 +65,10 @@ class _UserSignupPageState extends State<UserSignupPage> {
 
         // Navigate back to login or home page
         // Replace '/userhome' with the appropriate route
-        Navigator.pushReplacementNamed(context, '/userlogin');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UserHomePage()),
+        );
       } on FirebaseAuthException catch (e) {
         print(e.message);
       }
@@ -73,113 +78,198 @@ class _UserSignupPageState extends State<UserSignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const BackButtonIcon(),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'User Signup',
+          style: TextStyle(
+            color: Colors.white, // Set text color to white
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        title: const Text('User Signup Page'),
       ),
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,
-          child: Column(
-            children: <Widget>[
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                onSaved: (value) => name = value!,
-              ),
-              // Other form fields...
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Roll'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your roll number';
-                  }
-                  // Regex pattern for roll number
-                  String pattern = r'^(btech|bba|mtech|mba|bca)/\d{5}/\d{2}$';
-                  RegExp regex = RegExp(pattern);
-                  if (!regex.hasMatch(value)) {
-                    return 'Invalid roll number format';
-                  }
-                  return null;
-                },
-                onSaved: (value) => roll = value!,
-              ),
-              InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Hostel Number',
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: hostelNumber,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        hostelNumber = newValue!;
-                      });
-                    },
-                    items: <String>['BH1', 'BH2', 'BH3', 'GH']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Room Number'),
-                onSaved: (value) => roomNumber = value!,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || !emailRegex.hasMatch(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
-                onSaved: (value) => email = value!,
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureText ? Icons.visibility : Icons.visibility_off,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  onSaved: (value) => name = value!,
+                ),
+                SizedBox(
+                    height: 10.0), // Add space between the name and roll fields
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Roll',
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your roll number';
+                    }
+                    // Regex pattern for roll number
+                    String pattern = r'^(btech|bba|mtech|mba|bca)/\d{5}/\d{2}$';
+                    RegExp regex = RegExp(pattern);
+                    if (!regex.hasMatch(value)) {
+                      return 'Invalid roll number format';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => roll = value!,
+                ),
+                SizedBox(
+                    height:
+                        10.0), // Add space between the roll and hostel fields
+                InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Hostel Number',
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: hostelNumber,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          hostelNumber = newValue!;
+                        });
+                      },
+                      items: <String>['BH1', 'BH2', 'BH3', 'GH']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
-                obscureText: _obscureText,
-                onSaved: (value) => password = value!,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
-              ElevatedButton(
-                onPressed: _signup,
-                child: const Text('Signup'),
-              ),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/userlogin'),
-                child: const Text('Already have an account? Login'),
-              ),
-            ],
+                SizedBox(
+                    height:
+                        10.0), // Add space between the hostel and room fields
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Room Number',
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  onSaved: (value) => roomNumber = value!,
+                ),
+                SizedBox(
+                    height:
+                        10.0), // Add space between the room and email fields
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || !emailRegex.hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => email = value!,
+                ),
+                SizedBox(
+                    height:
+                        10.0), // Add space between the email and password fields
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    ),
+                    labelStyle: TextStyle(color: Colors.white),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  obscureText: _obscureText,
+                  onSaved: (value) => password = value!,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(
+                    height:
+                        10.0), // Add space between the password and signup button
+                ElevatedButton(
+                  onPressed: _signup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Color.fromARGB(255, 27, 27, 27), // Dark grey color
+                  ),
+                  child: const Text('Signup',
+                      style: TextStyle(color: Colors.white)),
+                ),
+                // TextButton(
+                //   onPressed: () =>
+                //       Navigator.pushReplacementNamed(context, '/userlogin'),
+                //   child: const Text('Already have an account? Login'),
+                // ),
+              ],
+            ),
           ),
         ),
       ),

@@ -39,11 +39,14 @@ dependencies:
   cloud_firestore: ^4.14.0
   firebase_core_web: ^2.10.0
   firebase_core_dart: ^1.0.1
+  back_button_interceptor: ^7.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
+  carousel_slider: ^4.0.0
+  dots_indicator: ^3.0.0
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -74,6 +77,9 @@ flutter:
     - assets/images/bathroom_icon.jpg
     - assets/images/hostel_help_logo.jpg
     - assets/images/discipline_icon.jpg
+    - assets/images/faculty.jpg
+    - assets/images/login.jpg
+    - assets/images/signup.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

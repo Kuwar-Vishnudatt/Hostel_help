@@ -28,14 +28,14 @@ class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const BackButtonIcon(),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+        title: const Text(
+          'Disciplinary Action',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(212, 255, 255, 255)),
         ),
-        title: const Text('Disciplinary Action'),
       ),
       body: SafeArea(
         child: Padding(
@@ -47,8 +47,24 @@ class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
                 // Add your input fields here
 
                 TextFormField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Phone Number',
+                    labelStyle:
+                        TextStyle(color: Colors.white), // White label color
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the value as needed
+                      borderSide:
+                          BorderSide(color: Colors.white), // White border color
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the value as needed
+                      borderSide:
+                          BorderSide(color: Colors.white), // White border color
+                    ),
+                    filled: true,
+                    fillColor: Colors.black, // Black background color
                   ),
                   keyboardType: TextInputType.phone,
                   onChanged: (value) {
@@ -65,9 +81,26 @@ class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
                     return null;
                   },
                 ),
+                SizedBox(height: 16.0), // Add space between fields
                 TextFormField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Complaint',
+                    labelStyle:
+                        TextStyle(color: Colors.white), // White label color
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the value as needed
+                      borderSide:
+                          BorderSide(color: Colors.white), // White border color
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the value as needed
+                      borderSide:
+                          BorderSide(color: Colors.white), // White border color
+                    ),
+                    filled: true,
+                    fillColor: Colors.black, // Black background color
                   ),
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
@@ -75,7 +108,12 @@ class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
                     complaint = value;
                   },
                 ),
+                SizedBox(height: 16.0),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Color.fromARGB(255, 27, 27, 27), // Dark grey color
+                  ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       // If the form is valid, display a Snackbar and send the complaint to the other frontend
@@ -137,10 +175,13 @@ class _DisciplineComplaintPageState extends State<DisciplineComplaintPage> {
                       // Clear the form fields
                       // Navigate back to the UserHomePage
                       // ignore: use_build_context_synchronously
-                      Navigator.of(context).pop();
+                      // Navigator.of(context).pop();
                     }
                   },
-                  child: const Text('Submit'),
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
