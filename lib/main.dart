@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hostel_help/pages/faculty/faculty_home_page.dart';
-import 'package:hostel_help/pages/faculty/faculty_login_page.dart';
+// import 'package:hostel_help/pages/faculty/faculty_login_page.dart';
 // import 'package:hostel_help/pages/faculty/faculty_signup_page.dart';
-import 'package:hostel_help/pages/user/user_login_page.dart';
+// import 'package:hostel_help/pages/user/user_login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hostel_help/pages/user/user_signup_page.dart';
+// import 'package:hostel_help/pages/user/user_signup_page.dart';
 import 'package:hostel_help/pages/main_screen.dart';
 
 import 'pages/user/user_home_page.dart';

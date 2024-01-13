@@ -143,6 +143,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
+          // ignore: unnecessary_null_comparison
           if (facultyType == null || facultyType.isEmpty) {
             return const Center(child: Text('No faculty type found.'));
           }
@@ -200,7 +201,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
   }
 
   _formatTimestamp(String timestamp) {
-    if (timestamp != null && timestamp.isNotEmpty) {
+    if (timestamp.isNotEmpty) {
       DateTime dateTime = DateTime.parse(timestamp); // Parse string to DateTime
       String formattedDate =
           '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
