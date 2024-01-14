@@ -16,7 +16,6 @@ class UserLoginPage extends StatefulWidget {
   const UserLoginPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _UserLoginPageState createState() => _UserLoginPageState();
 }
 
@@ -30,7 +29,6 @@ class _UserLoginPageState extends State<UserLoginPage> {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       // Provide feedback to the user that a password reset email has been sent
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password reset email sent')),
       );
@@ -124,16 +122,30 @@ class _UserLoginPageState extends State<UserLoginPage> {
                   try {
                     final user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
-                    if (user != null) {
-                      // Set isLoggedIn to true
-                      await AuthHelper.setIsLoggedIn(true);
 
-                      // Navigate to the next screen
-                      // ignore: use_build_context_synchronously
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => UserHomePage()),
-                      );
+                    if (user != null) {
+                      // Check if the user's email is verified
+                      if (user.user!.emailVerified) {
+                        // Set isLoggedIn to true
+                        await AuthHelper.setIsLoggedIn(true);
+                        await AuthHelper.setUserType('user');
+                        // Navigate to the next screen
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => UserHomePage()),
+                        );
+                      } else {
+                        // If email is not verified, show a message and sign out
+                        await _auth.signOut();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                "Please verify your email before logging in."),
+                            duration: Duration(seconds: 5),
+                          ),
+                        );
+                      }
                     }
                   } catch (e) {
                     print(e);
@@ -158,11 +170,6 @@ class _UserLoginPageState extends State<UserLoginPage> {
                   'Forgot Password?',
                 ),
               ),
-              // TextButton(
-              //   onPressed: () =>
-              //       Navigator.pushReplacementNamed(context, '/usersignup'),
-              //   child: const Text("Don't have an account? Signup"),
-              // ),
             ],
           ),
         ),

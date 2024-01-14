@@ -16,8 +16,6 @@ import 'user_complaint_page.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 
-// Import your power, lan, general, and disciplinary action pages here
-
 MaterialColor createMaterialColor(Color color) {
   List<double> strengths = <double>[.05];
   Map<int, Color> swatch = {};

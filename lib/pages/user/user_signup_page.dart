@@ -65,10 +65,6 @@ class _UserSignupPageState extends State<UserSignupPage> {
 
         // Navigate back to login or home page
         // Replace '/userhome' with the appropriate route
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => UserHomePage()),
-        );
       } on FirebaseAuthException catch (e) {
         print(e.message);
       }
@@ -132,7 +128,8 @@ class _UserSignupPageState extends State<UserSignupPage> {
                       return 'Please enter your roll number';
                     }
                     // Regex pattern for roll number
-                    String pattern = r'^(btech|bba|mtech|mba|bca)/\d{5}/\d{2}$';
+                    String pattern =
+                        r'^(btech|BTECH|bba|BBA|mba|MBA|mtech|MTECH|bca|BCA|mca|MCA)/\d{5}/\d{2}$';
                     RegExp regex = RegExp(pattern);
                     if (!regex.hasMatch(value)) {
                       return 'Invalid roll number format';
@@ -239,6 +236,10 @@ class _UserSignupPageState extends State<UserSignupPage> {
                       borderSide: BorderSide(color: Colors.white),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
                   ),
                   obscureText: _obscureText,
                   onSaved: (value) => password = value!,
@@ -248,6 +249,10 @@ class _UserSignupPageState extends State<UserSignupPage> {
                     }
                     if (value.length < 6) {
                       return 'Password must be at least 6 characters';
+                    }
+                    if (!RegExp(r'^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>]).*$')
+                        .hasMatch(value)) {
+                      return 'Password must contain at least one special character and one number';
                     }
                     return null;
                   },

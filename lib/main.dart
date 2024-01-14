@@ -23,11 +23,11 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
       ),
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(), // Use a SplashScreen or initial loading screen
+      home: SplashScreen(),
       routes: {
         'hostelhelp': (context) => HostelHelp(),
         '/userhome': (context) => UserHomePage(),
-        '/facultyhome': (context) => const FacultyHomePage(),
+        '/facultyhome': (context) => FacultyHomePage(),
       },
     );
   }
@@ -49,13 +49,23 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 2));
 
     final isLoggedIn = await AuthHelper.getIsLoggedIn();
+    final userType = await AuthHelper.getUserType();
 
-    // Navigate based on the authentication state
+    // Navigate based on the authentication state and user type
     if (isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => UserHomePage()),
-      );
+      if (userType == 'user') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UserHomePage()),
+        );
+      } else if (userType == 'faculty') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => FacultyHomePage()),
+        );
+      } else {
+        // Handle the case where user type is not set
+      }
     } else {
       Navigator.pushReplacement(
         context,

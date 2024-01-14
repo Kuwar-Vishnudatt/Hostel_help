@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hostel_help/pages/faculty/faculty_home_page.dart';
 
+import '../../auth_helper.dart';
+
 class FacultyLoginPage extends StatefulWidget {
   const FacultyLoginPage({Key? key});
 
@@ -26,6 +28,9 @@ class _FacultyLoginPageState extends State<FacultyLoginPage> {
           email: email,
           password: password,
         );
+        // Set isLoggedIn to true
+        await AuthHelper.setIsLoggedIn(true);
+        await AuthHelper.setUserType('faculty');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const FacultyHomePage()),
