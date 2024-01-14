@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../auth_helper.dart';
 import 'user_home_page.dart';
 
 void main() {
@@ -43,13 +44,14 @@ class _UserLoginPageState extends State<UserLoginPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         automaticallyImplyLeading: false,
         title: const Text(
           'User Login',
           style: TextStyle(
-              color: Color.fromARGB(255, 255, 255, 255),
-              fontWeight: FontWeight.bold,
-              backgroundColor: Colors.black87),
+            color: Color.fromARGB(255, 255, 255, 255),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -123,6 +125,9 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     final user = await _auth.signInWithEmailAndPassword(
                         email: email, password: password);
                     if (user != null) {
+                      // Set isLoggedIn to true
+                      await AuthHelper.setIsLoggedIn(true);
+
                       // Navigate to the next screen
                       // ignore: use_build_context_synchronously
                       Navigator.push(

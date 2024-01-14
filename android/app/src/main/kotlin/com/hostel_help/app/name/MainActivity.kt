@@ -1,4 +1,4 @@
-package com.hostel_help.package.name
+package com.hostel_help.app.name
 
 import io.flutter.embedding.android.FlutterActivity
 

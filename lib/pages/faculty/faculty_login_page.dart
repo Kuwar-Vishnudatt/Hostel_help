@@ -55,6 +55,7 @@ class _FacultyLoginPageState extends State<FacultyLoginPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         automaticallyImplyLeading: false,
         title: const Text(
           'Faculty Login',

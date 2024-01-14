@@ -40,6 +40,7 @@ dependencies:
   firebase_core_web: ^2.10.0
   firebase_core_dart: ^1.0.1
   back_button_interceptor: ^7.0.0
+  fluttertoast: ^8.1.1
 
 dev_dependencies:
   flutter_test:

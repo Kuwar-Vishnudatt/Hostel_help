@@ -1,13 +1,17 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unnecessary_null_comparison
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hostel_help/pages/complaint/discipline_page.dart';
+import 'package:hostel_help/pages/main_screen.dart';
+import '../../auth_helper.dart';
 import '../complaint/general_page.dart';
 import '../complaint/lan_page.dart';
 import '../complaint/power_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:io';
 import 'user_complaint_page.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
@@ -49,7 +53,7 @@ class _UserHomePageState extends State<UserHomePage> {
   final _auth = FirebaseAuth.instance;
 
   final _firestore = FirebaseFirestore.instance;
-
+  DateTime? prevTime;
   @override
   void initState() {
     super.initState();
@@ -62,42 +66,35 @@ class _UserHomePageState extends State<UserHomePage> {
     super.dispose();
   }
 
-  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Do you want to logout?'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Continue with the default back button behavior
-              stopDefaultButtonEvent =
-                  false; // Use this instead of BackButtonInterceptor.shouldPopRoute
-            },
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () {
-              _logout(context);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    );
+  Future<bool> myInterceptor(
+      bool stopDefaultButtonEvent, RouteInfo info) async {
+    DateTime now = DateTime.now();
 
-    // Prevent the default back button behavior
-    stopDefaultButtonEvent =
-        true; // Use this instead of BackButtonInterceptor.shouldPopRoute
-    return true;
+    if (prevTime == null || now.difference(prevTime!) > Duration(seconds: 2)) {
+      Fluttertoast.showToast(
+        msg: 'Press back again to exit the app',
+        timeInSecForIosWeb: 2,
+      );
+      await AuthHelper.setIsLoggedIn(true);
+      prevTime = now;
+      stopDefaultButtonEvent = true;
+    } else {
+      await AuthHelper.setIsLoggedIn(true);
+      // Use SystemNavigator to exit the app
+      SystemNavigator.pop();
+      stopDefaultButtonEvent = false;
+    }
+
+    return stopDefaultButtonEvent;
   }
 
   void _logout(BuildContext context) async {
     await _auth.signOut();
-    Navigator.pushReplacementNamed(context, '/');
+    await AuthHelper.setIsLoggedIn(false);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HostelHelp()),
+    );
   }
 
   @override

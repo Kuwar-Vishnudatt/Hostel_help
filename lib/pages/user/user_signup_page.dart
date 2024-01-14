@@ -80,6 +80,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         automaticallyImplyLeading: false,
         title: const Text(
           'User Signup',
