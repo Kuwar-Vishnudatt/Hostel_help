@@ -114,6 +114,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                   decoration: InputDecoration(
                     labelText: 'Roll',
                     labelStyle: TextStyle(color: Colors.white),
+                    helperText: "Enter in the format:branch/15xxx/22",
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                       borderRadius: BorderRadius.circular(10.0),

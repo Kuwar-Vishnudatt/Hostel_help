@@ -9,8 +9,210 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../auth_helper.dart';
 import '../main_screen.dart';
 
+// class FacultyHomePage extends StatefulWidget {
+//   const FacultyHomePage({super.key});
+
+//   @override
+//   _FacultyHomePageState createState() => _FacultyHomePageState();
+// }
+
+// class _FacultyHomePageState extends State<FacultyHomePage> {
+//   final _firestore = FirebaseFirestore.instance;
+//   final _auth = FirebaseAuth.instance;
+//    String? facultyType;
+//   DateTime? prevTime;
+//   @override
+//   void initState() {
+//     super.initState();
+//     BackButtonInterceptor.add(myInterceptor);
+//     fetchFacultyType();
+//   }
+
+//   @override
+//   void dispose() {
+//     BackButtonInterceptor.remove(myInterceptor);
+//     super.dispose();
+//   }
+
+//   Future<bool> myInterceptor(
+//       bool stopDefaultButtonEvent, RouteInfo info) async {
+//     DateTime now = DateTime.now();
+
+//     if (prevTime == null || now.difference(prevTime!) > Duration(seconds: 2)) {
+//       Fluttertoast.showToast(
+//         msg: 'Press back again to exit the app',
+//         timeInSecForIosWeb: 2,
+//       );
+//       await AuthHelper.setIsLoggedIn(true);
+//       prevTime = now;
+//       stopDefaultButtonEvent = true;
+//     } else {
+//       await AuthHelper.setIsLoggedIn(true);
+//       // Use SystemNavigator to exit the app
+//       SystemNavigator.pop();
+//       stopDefaultButtonEvent = false;
+//     }
+
+//     return stopDefaultButtonEvent;
+//   }
+
+//   void fetchFacultyType() async {
+//     final user = FirebaseAuth.instance.currentUser;
+//     if (user != null) {
+//       final userData = await FirebaseFirestore.instance
+//           .collection('faculty')
+//           .doc(user.uid)
+//           .get();
+//       setState(() {
+//         facultyType = userData['facultyType'];
+//       });
+//     }
+//   }
+
+//   void _logout(BuildContext context) async {
+//     await _auth.signOut();
+//     await AuthHelper.setIsLoggedIn(false);
+//     Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(builder: (context) => HostelHelp()),
+//     );
+//   }
+
+//   void _markAsSeen(DocumentSnapshot complaint) async {
+//     await _firestore
+//         .collection('complaints')
+//         .doc(complaint.id)
+//         .update({'seen': true});
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//           automaticallyImplyLeading: false,
+//           title: const Text('Faculty Home Page'),
+//           actions: <Widget>[
+//             IconButton(
+//               icon: const Icon(Icons.account_circle),
+//               onPressed: () async {
+//                 final user = _auth.currentUser;
+//                 if (user != null) {
+//                   final userData = await _firestore
+//                       .collection('faculty')
+//                       .doc(user.uid)
+//                       .get();
+//                   showDialog(
+//                     context: context,
+//                     builder: (BuildContext context) {
+//                       return AlertDialog(
+//                         title: const Text('Profile'),
+//                         content: SingleChildScrollView(
+//                           child: ListBody(
+//                             children: <Widget>[
+//                               Text('Name: ${userData['name']}'),
+//                               Text('Type: ${userData['facultyType']}'),
+//                             ],
+//                           ),
+//                         ),
+//                         actions: <Widget>[
+//                           TextButton(
+//                             child: const Text('OK'),
+//                             onPressed: () {
+//                               Navigator.of(context).pop();
+//                             },
+//                           ),
+//                         ],
+//                       );
+//                     },
+//                   );
+//                 }
+//               },
+//             ),
+//             IconButton(
+//               icon: const Icon(Icons.logout),
+//               onPressed: () => _logout(context),
+//             ),
+//           ]),
+//       body: StreamBuilder<QuerySnapshot>(
+//         stream: _firestore
+//             .collection('complaints')
+//             .orderBy('date', descending: true)
+//             .snapshots(),
+//         builder: (context, snapshot) {
+//           if (!snapshot.hasData) {
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//           // ignore: unnecessary_null_comparison
+//           if (facultyType == null || facultyType!.isEmpty) {
+//             return const Center(child: Text('No faculty type found.'));
+//           }
+//           List<DocumentSnapshot> complaints =
+//               snapshot.data!.docs.where((complaint) {
+//             String complaintType = complaint['type'];
+//             return complaintType == facultyType;
+//           }).toList();
+//           return ListView.builder(
+//             itemCount: complaints.length,
+//             itemBuilder: (context, index) {
+//               DocumentSnapshot complaint = complaints[index];
+//               bool seen =
+//                   (complaint.data() as Map<String, dynamic>).containsKey('seen')
+//                       ? complaint['seen']
+//                       : false;
+//               bool addressed = (complaint.data() as Map<String, dynamic>)
+//                       .containsKey('addressed')
+//                   ? complaint['addressed']
+//                   : false;
+//               return ListTile(
+//                 title: Text('Complaint from ${complaint['name']}'),
+//                 subtitle: RichText(
+//                   text: TextSpan(
+//                     style: DefaultTextStyle.of(context).style,
+//                     children: <TextSpan>[
+//                       TextSpan(
+//                           text: 'Roll: ${complaint['roll']}\n'
+//                               'Hostel Number: ${complaint['hostelNumber']}\n'
+//                               'Room Number: ${complaint['roomNumber']}\n'
+//                               'Phone Number: ${complaint['phoneNumber']}\n'
+//                               'Complaint: ${complaint['complaint']}\n'
+//                               'date: ${_formatTimestamp(complaint['date'])}\n'
+//                               'Addressed: '),
+//                       TextSpan(
+//                         text: '${addressed ? 'Yes' : 'No'}',
+//                         style: TextStyle(
+//                             fontWeight: FontWeight.bold,
+//                             color: addressed ? Colors.green : Colors.red),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 trailing: IconButton(
+//                   icon: Icon(
+//                       seen ? Icons.check_box : Icons.check_box_outline_blank),
+//                   onPressed: () => _markAsSeen(complaint),
+//                 ),
+//               );
+//             },
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   _formatTimestamp(String timestamp) {
+//     if (timestamp.isNotEmpty) {
+//       DateTime dateTime = DateTime.parse(timestamp); // Parse string to DateTime
+//       String formattedDate =
+//           '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
+//       return ': $formattedDate'; // Display the formatted DateTime
+//     } else {
+//       return ': No timestamp';
+//     }
+//   }
+// }
+
 class FacultyHomePage extends StatefulWidget {
-  const FacultyHomePage({super.key});
+  const FacultyHomePage({Key? key}) : super(key: key);
 
   @override
   _FacultyHomePageState createState() => _FacultyHomePageState();
@@ -19,13 +221,17 @@ class FacultyHomePage extends StatefulWidget {
 class _FacultyHomePageState extends State<FacultyHomePage> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  late String facultyType;
+  String? facultyType;
+  String? staffType;
+  late String facultyHostelNumber;
   DateTime? prevTime;
+
   @override
   void initState() {
     super.initState();
     BackButtonInterceptor.add(myInterceptor);
     fetchFacultyType();
+    fetchStaffDetails();
   }
 
   @override
@@ -48,7 +254,6 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
       stopDefaultButtonEvent = true;
     } else {
       await AuthHelper.setIsLoggedIn(true);
-      // Use SystemNavigator to exit the app
       SystemNavigator.pop();
       stopDefaultButtonEvent = false;
     }
@@ -56,16 +261,40 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
     return stopDefaultButtonEvent;
   }
 
-  void fetchFacultyType() async {
+  Future<void> fetchFacultyType() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final userData = await FirebaseFirestore.instance
-          .collection('faculty')
-          .doc(user.uid)
-          .get();
-      setState(() {
-        facultyType = userData['facultyType'];
-      });
+      try {
+        final userData = await FirebaseFirestore.instance
+            .collection('faculty')
+            .doc(user.uid)
+            .get();
+        setState(() {
+          facultyType = userData['facultyType'];
+          facultyHostelNumber = userData['hostelNumber'];
+        });
+      } catch (e) {
+        print("Error fetching facultyType: $e");
+        // Handle error
+      }
+    }
+  }
+
+  Future<void> fetchStaffDetails() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final staffData = await FirebaseFirestore.instance
+            .collection('staff')
+            .doc(user.uid)
+            .get();
+        setState(() {
+          staffType = staffData['staffType'];
+        });
+      } catch (e) {
+        print("Error fetching staffType: $e");
+        // Handle error
+      }
     }
   }
 
@@ -85,54 +314,83 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
         .update({'seen': true});
   }
 
+  void _buildProfileDialog(BuildContext context, String name, String type) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Profile'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Name: $name'),
+                Text('Type: $type'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (facultyType == null && staffType == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Faculty Home Page'),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text('Faculty Home Page'),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.account_circle),
-              onPressed: () async {
-                final user = _auth.currentUser;
-                if (user != null) {
+        automaticallyImplyLeading: false,
+        title: const Text('Faculty Home Page'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () async {
+              final user = _auth.currentUser;
+              if (user != null) {
+                String profileName = 'Unknown';
+                String profileType = 'Unknown';
+
+                if (facultyType != null) {
                   final userData = await _firestore
                       .collection('faculty')
                       .doc(user.uid)
                       .get();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Profile'),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: <Widget>[
-                              Text('Name: ${userData['name']}'),
-                              Text('Type: ${userData['facultyType']}'),
-                            ],
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('OK'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
+                  profileName = userData['name'];
+                  profileType = userData['facultyType'];
+                } else if (staffType != null) {
+                  final staffData =
+                      await _firestore.collection('staff').doc(user.uid).get();
+                  profileName = staffData['name'];
+                  profileType = staffData['staffType'];
                 }
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => _logout(context),
-            ),
-          ]),
+
+                _buildProfileDialog(context, profileName, profileType);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
             .collection('complaints')
@@ -142,15 +400,31 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          // ignore: unnecessary_null_comparison
-          if (facultyType == null || facultyType.isEmpty) {
-            return const Center(child: Text('No faculty type found.'));
-          }
+
           List<DocumentSnapshot> complaints =
               snapshot.data!.docs.where((complaint) {
             String complaintType = complaint['type'];
-            return complaintType == facultyType;
+
+            if (facultyType == 'Chiefwarden' &&
+                (complaintType == 'Discipline' || complaintType == 'General')) {
+              return true;
+            } else if (facultyType == 'Warden' &&
+                complaintType == 'General' &&
+                facultyHostelNumber == complaint['hostelNumber']) {
+              return true;
+            } else if ((facultyType == 'LAN' || facultyType == 'Power') &&
+                facultyType == complaintType) {
+              return true;
+            } else if ((staffType == 'Power' ||
+                    staffType == 'LAN' ||
+                    staffType == 'General') &&
+                staffType == complaintType) {
+              return true;
+            } else {
+              return false;
+            }
           }).toList();
+
           return ListView.builder(
             itemCount: complaints.length,
             itemBuilder: (context, index) {
@@ -163,6 +437,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                       .containsKey('addressed')
                   ? complaint['addressed']
                   : false;
+
               return ListTile(
                 title: Text('Complaint from ${complaint['name']}'),
                 subtitle: RichText(
@@ -170,13 +445,14 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                     style: DefaultTextStyle.of(context).style,
                     children: <TextSpan>[
                       TextSpan(
-                          text: 'Roll: ${complaint['roll']}\n'
-                              'Hostel Number: ${complaint['hostelNumber']}\n'
-                              'Room Number: ${complaint['roomNumber']}\n'
-                              'Phone Number: ${complaint['phoneNumber']}\n'
-                              'Complaint: ${complaint['complaint']}\n'
-                              'date: ${_formatTimestamp(complaint['date'])}\n'
-                              'Addressed: '),
+                        text: 'Roll: ${complaint['roll']}\n'
+                            'Hostel Number: ${complaint['hostelNumber']}\n'
+                            'Room Number: ${complaint['roomNumber']}\n'
+                            'Phone Number: ${complaint['phoneNumber']}\n'
+                            'Complaint: ${complaint['complaint']}\n'
+                            'date: ${_formatTimestamp(complaint['date'])}\n'
+                            'Addressed: ',
+                      ),
                       TextSpan(
                         text: '${addressed ? 'Yes' : 'No'}',
                         style: TextStyle(
@@ -201,10 +477,10 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
 
   _formatTimestamp(String timestamp) {
     if (timestamp.isNotEmpty) {
-      DateTime dateTime = DateTime.parse(timestamp); // Parse string to DateTime
+      DateTime dateTime = DateTime.parse(timestamp);
       String formattedDate =
           '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
-      return ': $formattedDate'; // Display the formatted DateTime
+      return ': $formattedDate';
     } else {
       return ': No timestamp';
     }

@@ -133,7 +133,8 @@ class _UserLoginPageState extends State<UserLoginPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => UserHomePage()),
+                            builder: (context) => UserHomePage(),
+                          ),
                         );
                       } else {
                         // If email is not verified, show a message and sign out
@@ -146,6 +147,18 @@ class _UserLoginPageState extends State<UserLoginPage> {
                           ),
                         );
                       }
+                    }
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'user-not-found' ||
+                        e.code == 'wrong-password') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Wrong email or password."),
+                          duration: Duration(seconds: 5),
+                        ),
+                      );
+                    } else {
+                      print(e);
                     }
                   } catch (e) {
                     print(e);
