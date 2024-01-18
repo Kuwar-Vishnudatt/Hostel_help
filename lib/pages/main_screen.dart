@@ -88,6 +88,9 @@ class _IconSliderState extends State<IconSlider> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SizedBox(
+          height: 25,
+        ),
         CarouselSlider(
           options: CarouselOptions(
             height: 400,
