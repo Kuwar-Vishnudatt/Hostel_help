@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/services.dart';
 
 // Import your user and faculty login/signup pages here
 import 'user/user_login_page.dart';
@@ -103,6 +104,7 @@ class _IconSliderState extends State<IconSlider> {
             enlargeCenterPage: true,
             scrollDirection: Axis.horizontal,
             onPageChanged: (index, reason) {
+              HapticFeedback.heavyImpact();
               setState(() {
                 _current = index;
                 _showLogin = index == 0;
