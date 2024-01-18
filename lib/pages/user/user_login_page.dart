@@ -24,6 +24,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
   final _auth = FirebaseAuth.instance;
   late String email;
   late String password;
+  String _errorMessage = '';
 
   void _resetPassword() async {
     try {
@@ -119,17 +120,21 @@ class _UserLoginPageState extends State<UserLoginPage> {
               ),
               ElevatedButton(
                 onPressed: () async {
+                  setState(() {
+                    _errorMessage =
+                        ''; // Reset error message before attempting login
+                  });
+
                   try {
                     final user = await _auth.signInWithEmailAndPassword(
-                        email: email, password: password);
+                      email: email,
+                      password: password,
+                    );
 
                     if (user != null) {
-                      // Check if the user's email is verified
                       if (user.user!.emailVerified) {
-                        // Set isLoggedIn to true
                         await AuthHelper.setIsLoggedIn(true);
                         await AuthHelper.setUserType('user');
-                        // Navigate to the next screen
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -137,31 +142,27 @@ class _UserLoginPageState extends State<UserLoginPage> {
                           ),
                         );
                       } else {
-                        // If email is not verified, show a message and sign out
                         await _auth.signOut();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                "Please verify your email before logging in."),
-                            duration: Duration(seconds: 5),
-                          ),
-                        );
+                        setState(() {
+                          _errorMessage =
+                              "Please verify your email before logging in.";
+                        });
                       }
                     }
                   } on FirebaseAuthException catch (e) {
+                    String errorMessage;
                     if (e.code == 'user-not-found' ||
                         e.code == 'wrong-password') {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Wrong email or password."),
-                          duration: Duration(seconds: 5),
-                        ),
-                      );
+                      errorMessage = 'Wrong email or password';
                     } else {
-                      print(e);
+                      errorMessage =
+                          'Firebase Authentication Error: ${e.message}';
                     }
+                    setState(() {
+                      _errorMessage = errorMessage;
+                    });
                   } catch (e) {
-                    print(e);
+                    print('Error: $e');
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -183,6 +184,17 @@ class _UserLoginPageState extends State<UserLoginPage> {
                   'Forgot Password?',
                 ),
               ),
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    _errorMessage,
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 255, 17, 0),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

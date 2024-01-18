@@ -271,7 +271,10 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             .get();
         setState(() {
           facultyType = userData['facultyType'];
-          facultyHostelNumber = userData['hostelNumber'];
+          if (facultyType == 'Warden') {
+            // Fetch facultyHostelNumber only for Wardens
+            facultyHostelNumber = userData['hostelNumber'];
+          }
         });
       } catch (e) {
         print("Error fetching facultyType: $e");
