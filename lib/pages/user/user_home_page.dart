@@ -11,6 +11,7 @@ import '../complaint/power_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
 // import 'dart:io';
 import 'user_complaint_page.dart';
 
@@ -218,6 +219,7 @@ class _IconSliderState extends State<IconSlider> {
             enlargeCenterPage: true,
             scrollDirection: Axis.horizontal,
             onPageChanged: (index, reason) {
+              HapticFeedback.heavyImpact();
               setState(() {
                 _current = index;
                 _showPower = index == 0;
