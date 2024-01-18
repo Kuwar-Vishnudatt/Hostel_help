@@ -130,7 +130,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                     }
                     // Regex pattern for roll number
                     String pattern =
-                        r'^(btech|BTECH|bba|BBA|mba|MBA|mtech|MTECH|bca|BCA|mca|MCA)/\d{5}/\d{2}$';
+                        r'^(be|BE|btech|BTECH|bba|BBA|mba|MBA|mtech|MTECH|bca|BCA|mca|MCA)/\d{5}/\d{2}$';
                     RegExp regex = RegExp(pattern);
                     if (!regex.hasMatch(value)) {
                       return 'Invalid roll number format';
@@ -198,6 +198,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(color: Colors.white),
+                    hintText: "Enter your institute email",
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                       borderRadius: BorderRadius.circular(10.0),
