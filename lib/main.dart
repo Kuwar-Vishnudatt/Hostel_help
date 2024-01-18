@@ -3,8 +3,8 @@ import 'package:hostel_help/pages/faculty/faculty_home_page.dart';
 import 'package:hostel_help/pages/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hostel_help/pages/user/user_home_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_helper.dart';
 
 void main() async {

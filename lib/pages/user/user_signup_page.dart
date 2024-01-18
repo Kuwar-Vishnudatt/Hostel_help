@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'user_home_page.dart';
+// import 'user_home_page.dart';
 
 class UserSignupPage extends StatefulWidget {
   const UserSignupPage({Key? key});
@@ -114,7 +114,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                   decoration: InputDecoration(
                     labelText: 'Roll',
                     labelStyle: TextStyle(color: Colors.white),
-                    helperText: "Enter in the format:branch/15xxx/22",
+                    hintText: "Enter in the format:branch/15xxx/22",
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                       borderRadius: BorderRadius.circular(10.0),
