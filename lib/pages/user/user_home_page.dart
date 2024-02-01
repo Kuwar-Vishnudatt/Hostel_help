@@ -99,6 +99,8 @@ class _UserHomePageState extends State<UserHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double appBarHeight = kToolbarHeight;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
@@ -106,76 +108,92 @@ class _UserHomePageState extends State<UserHomePage> {
         brightness: Brightness.dark,
         primarySwatch: createMaterialColor(Color.fromARGB(255, 255, 255, 255)),
       ),
-      home: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Center(
-            child: const Text(
-              'HOSTEL HELP',
-              style: TextStyle(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  fontWeight: FontWeight.bold),
+      home: SafeArea(
+        child: Scaffold(
+          extendBody: true,
+          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(appBarHeight),
+            child: Container(
+              color: Colors.black,
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () => _logout(context),
+                  ),
+                  Text(
+                    'HOSTEL HELP',
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.account_circle),
+                    onPressed: () async {
+                      final user = _auth.currentUser;
+                      if (user != null) {
+                        final userData = await _firestore
+                            .collection('users')
+                            .doc(user.uid)
+                            .get();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Profile'),
+                              content: SingleChildScrollView(
+                                child: ListBody(
+                                  children: <Widget>[
+                                    Text('Name: ${userData['name']}'),
+                                    Text('Roll: ${userData['roll']}'),
+                                    Text('Hostel: ${userData['hostelNumber']}'),
+                                    Text(
+                                        'Room Number: ${userData['roomNumber']}'),
+                                  ],
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('View Complaints'),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const UserComplaintsPage(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => _logout(context),
+          body: SafeArea(
+            top: true,
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Center(
+                child: IconSlider(),
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.account_circle),
-              onPressed: () async {
-                final user = _auth.currentUser;
-                if (user != null) {
-                  final userData =
-                      await _firestore.collection('users').doc(user.uid).get();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Profile'),
-                        content: SingleChildScrollView(
-                          child: ListBody(
-                            children: <Widget>[
-                              Text('Name: ${userData['name']}'),
-                              Text('Roll: ${userData['roll']}'),
-                              Text('Hostel: ${userData['hostelNumber']}'),
-                              Text('Room Number: ${userData['roomNumber']}'),
-                            ],
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('OK'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          TextButton(
-                            child: const Text('View Complaints'),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const UserComplaintsPage()),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          child: Center(
-            child: IconSlider(),
           ),
         ),
       ),

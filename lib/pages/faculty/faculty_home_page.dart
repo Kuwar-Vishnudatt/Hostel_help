@@ -22,6 +22,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
   String? facultyType;
   String? staffType;
   late String facultyHostelNumber;
+  late String staffHostelNumber;
   DateTime? prevTime;
 
   @override
@@ -91,6 +92,10 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             .get();
         setState(() {
           staffType = staffData['staffType'];
+          if (staffType == 'Hostel Incharge') {
+            // Fetch facultyHostelNumber only for Wardens
+            staffHostelNumber = staffData['hostelNumber'];
+          }
         });
       } catch (e) {
         print("Error fetching staffType: $e");
@@ -158,39 +163,51 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Faculty Home Page'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () async {
-              final user = _auth.currentUser;
-              if (user != null) {
-                String profileName = 'Unknown';
-                String profileType = 'Unknown';
+        backgroundColor: Colors.black, // Set the background color to black
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () => _logout(context),
+            ),
+            Text(
+              'Faculty Home Page',
+              style: TextStyle(
+                color: Colors.white, // Set the title text color to white
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () async {
+                final user = _auth.currentUser;
+                if (user != null) {
+                  String profileName = 'Unknown';
+                  String profileType = 'Unknown';
 
-                if (facultyType != null) {
-                  final userData = await _firestore
-                      .collection('faculty')
-                      .doc(user.uid)
-                      .get();
-                  profileName = userData['name'];
-                  profileType = userData['facultyType'];
-                } else if (staffType != null) {
-                  final staffData =
-                      await _firestore.collection('staff').doc(user.uid).get();
-                  profileName = staffData['name'];
-                  profileType = staffData['staffType'];
+                  if (facultyType != null) {
+                    final userData = await _firestore
+                        .collection('faculty')
+                        .doc(user.uid)
+                        .get();
+                    profileName = userData['name'];
+                    profileType = userData['facultyType'];
+                  } else if (staffType != null) {
+                    final staffData = await _firestore
+                        .collection('staff')
+                        .doc(user.uid)
+                        .get();
+                    profileName = staffData['name'];
+                    profileType = staffData['staffType'];
+                  }
+
+                  _buildProfileDialog(context, profileName, profileType);
                 }
-
-                _buildProfileDialog(context, profileName, profileType);
-              }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
@@ -225,11 +242,12 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                 staffType == complaintType) {
               return true;
             } else if (staffType == 'Hostel Incharge') {
-              // Display all types of complaints for "Hostel Incharge"
-              return true;
-            } else {
-              return false;
+              if (staffHostelNumber.isNotEmpty &&
+                  staffHostelNumber == complaint['hostelNumber']) {
+                return true;
+              }
             }
+            return false;
           }).toList();
 
           return ListView.builder(
@@ -246,17 +264,22 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                   : false;
 
               return ListTile(
-                title: Text('Complaint from ${complaint['name']}'),
+                title: Text(
+                  'Complaint: ${complaint['complaint']}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 subtitle: RichText(
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
                     children: <TextSpan>[
                       TextSpan(
+                        text: 'Complaint from ${complaint['name']}\n',
+                      ),
+                      TextSpan(
                         text: 'Roll: ${complaint['roll']}\n'
                             'Hostel Number: ${complaint['hostelNumber']}\n'
                             'Room Number: ${complaint['roomNumber']}\n'
                             'Phone Number: ${complaint['phoneNumber']}\n'
-                            'Complaint: ${complaint['complaint']}\n'
                             'date: ${_formatTimestamp(complaint['date'])}\n'
                             'Addressed: ',
                       ),

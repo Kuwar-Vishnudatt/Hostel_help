@@ -46,6 +46,7 @@ class HostelHelp extends StatelessWidget {
       home: Scaffold(
         backgroundColor: const Color.fromARGB(255, 0, 0, 0),
         appBar: AppBar(
+            backgroundColor: Colors.black,
             automaticallyImplyLeading: false,
             title: Center(
               child: const Text(
