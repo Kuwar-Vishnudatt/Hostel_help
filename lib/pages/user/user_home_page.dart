@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 // import 'dart:io';
+import '../complaint/water_page.dart';
 import 'user_complaint_page.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
@@ -195,12 +196,14 @@ class _IconSliderState extends State<IconSlider> {
   bool _showLan = false;
   bool _showGeneral = false;
   bool _showDiscipline = false;
+  bool _showWater = false;
 
   final List<String> imgList = [
     'assets/images/power_icon.jpg',
     'assets/images/lan_icon.jpg',
     'assets/images/bathroom_icon.jpg',
     'assets/images/discipline_icon.jpg',
+    'assets/images/water_icon.jpg'
   ];
 
   @override
@@ -226,6 +229,7 @@ class _IconSliderState extends State<IconSlider> {
                 _showLan = index == 1;
                 _showGeneral = index == 2;
                 _showDiscipline = index == 3;
+                _showWater = index == 4;
               });
             },
           ),
@@ -244,6 +248,9 @@ class _IconSliderState extends State<IconSlider> {
                 break;
               case 3:
                 label = 'DISCIPLINARY ACTION';
+                break;
+              case 4:
+                label = 'WATER';
                 break;
               default:
                 label = '';
@@ -288,7 +295,11 @@ class _IconSliderState extends State<IconSlider> {
             end: const Offset(0, 0),
           ).animate(
             CurvedAnimation(
-              parent: _showPower || _showLan || _showGeneral || _showDiscipline
+              parent: _showPower ||
+                      _showLan ||
+                      _showGeneral ||
+                      _showDiscipline ||
+                      _showWater
                   ? const AlwaysStoppedAnimation(1)
                   : const AlwaysStoppedAnimation(0),
               curve: Curves.easeInOut,
@@ -296,7 +307,11 @@ class _IconSliderState extends State<IconSlider> {
           ),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 500),
-            height: _showPower || _showLan || _showGeneral || _showDiscipline
+            height: _showPower ||
+                    _showLan ||
+                    _showGeneral ||
+                    _showDiscipline ||
+                    _showWater
                 ? MediaQuery.of(context).size.height
                 : 0,
             child: _showPower
@@ -307,7 +322,9 @@ class _IconSliderState extends State<IconSlider> {
                         ? GeneralComplaintPage()
                         : _showDiscipline
                             ? DisciplineComplaintPage()
-                            : Container(),
+                            : _showWater
+                                ? WaterComplaintPage()
+                                : Container(),
           ),
         ),
       ],

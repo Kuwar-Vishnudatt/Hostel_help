@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PowerComplaintPage extends StatefulWidget {
-  const PowerComplaintPage({super.key});
+class WaterComplaintPage extends StatefulWidget {
+  const WaterComplaintPage({super.key});
 
   @override
-  _PowerComplaintPageState createState() => _PowerComplaintPageState();
+  _WaterComplaintPageState createState() => _WaterComplaintPageState();
 }
 
-class _PowerComplaintPageState extends State<PowerComplaintPage> {
+class _WaterComplaintPageState extends State<WaterComplaintPage> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
@@ -22,7 +22,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
   late String phoneNumber;
   late String complaint;
   final timestamp = DateTime.now().toIso8601String();
-  String type = 'Power';
+  String type = 'Water';
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
-          'Power Complaint Page',
+          'Water Complaint Page',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Color.fromARGB(212, 255, 255, 255)),

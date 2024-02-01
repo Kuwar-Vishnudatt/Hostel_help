@@ -17,7 +17,7 @@ class _GeneralComplaintPageState extends State<GeneralComplaintPage> {
   final _firestore = FirebaseFirestore.instance;
   late String name;
   late String roll;
-  String hostelNumber = 'BH3';
+  late String hostelNumber;
   late String roomNumber;
   late String phoneNumber;
   late String complaint;
