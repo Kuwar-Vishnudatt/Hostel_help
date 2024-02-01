@@ -213,13 +213,19 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                 complaintType == 'General' &&
                 facultyHostelNumber == complaint['hostelNumber']) {
               return true;
-            } else if ((facultyType == 'LAN' || facultyType == 'Power') &&
+            } else if ((facultyType == 'LAN' ||
+                    facultyType == 'Power' ||
+                    facultyType == 'Water') &&
                 facultyType == complaintType) {
               return true;
             } else if ((staffType == 'Power' ||
                     staffType == 'LAN' ||
-                    staffType == 'General') &&
+                    staffType == 'General' ||
+                    staffType == 'Water') &&
                 staffType == complaintType) {
+              return true;
+            } else if (staffType == 'Hostel Incharge') {
+              // Display all types of complaints for "Hostel Incharge"
               return true;
             } else {
               return false;
