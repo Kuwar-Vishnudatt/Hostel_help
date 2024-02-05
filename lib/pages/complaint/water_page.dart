@@ -154,7 +154,7 @@ class _WaterComplaintPageState extends State<WaterComplaintPage> {
                             'complaint': complaint,
                             'seen': false,
                             'addressed': false,
-                            'date': timestamp,
+                            'date': FieldValue.serverTimestamp(),
                             'type': type,
                           });
                           ScaffoldMessenger.of(context).showSnackBar(

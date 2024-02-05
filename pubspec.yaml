@@ -41,6 +41,9 @@ dependencies:
   firebase_core_dart: ^1.0.1
   back_button_interceptor: ^7.0.0
   fluttertoast: ^8.1.1
+  path_provider: ^2.1.2
+  pdf: ^3.10.7
+  firebase_messaging: ^14.7.14
 
 dev_dependencies:
   flutter_test:

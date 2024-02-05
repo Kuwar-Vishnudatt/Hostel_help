@@ -154,7 +154,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                             'complaint': complaint,
                             'seen': false,
                             'addressed': false,
-                            'date': timestamp,
+                            'date': FieldValue.serverTimestamp(),
                             'type': type,
                           });
                           ScaffoldMessenger.of(context).showSnackBar(

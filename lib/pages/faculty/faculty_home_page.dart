@@ -5,6 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'dart:io';
 
 import '../../auth_helper.dart';
 import '../main_screen.dart';
@@ -24,6 +27,9 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
   late String facultyHostelNumber;
   late String staffHostelNumber;
   DateTime? prevTime;
+  Map<DocumentSnapshot, ValueNotifier<bool>> selectedComplaints = {};
+  Map<String, String> materialsUsedMap = {};
+  List<_ComplaintSelection> selectedComplaintsList = [];
 
   @override
   void initState() {
@@ -120,6 +126,119 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
         .update({'seen': true});
   }
 
+  // Function to toggle selection of a complaint
+  void _toggleComplaintSelection(DocumentSnapshot complaint) {
+    setState(() {
+      _ComplaintSelection? existingSelection =
+          selectedComplaintsList.firstWhere(
+        (selection) => selection.complaint.id == complaint.id,
+        orElse: () => _ComplaintSelection(complaint: complaint),
+      );
+
+      if (existingSelection.isSelected.value) {
+        existingSelection.isSelected.value = false;
+        selectedComplaintsList.remove(existingSelection);
+      } else {
+        existingSelection.isSelected.value = true;
+        selectedComplaintsList.add(existingSelection);
+      }
+    });
+  }
+
+  // Function to update materialsUsedMap for selected complaints
+  void _updateMaterialsUsedMap() {
+    setState(() {
+      materialsUsedMap = {};
+      for (final selection in selectedComplaintsList) {
+        materialsUsedMap[selection.complaint.id] = selection.materialUsed ?? '';
+      }
+    });
+  }
+
+  // Function to show a dialog for materials input
+  Future<void> _showMaterialInputDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Materials Used'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    for (final complaint in selectedComplaintsList)
+                      _buildMaterialInputField(complaint, setState),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Generate PDF'),
+                  onPressed: () {
+                    // Generate PDF with selected complaints and materials used
+                    _generatePDFReport();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Function to build a material input field for each complaint
+  Widget _buildMaterialInputField(
+      _ComplaintSelection complaint, StateSetter setState) {
+    return TextField(
+      onChanged: (value) {
+        // Update materialsUsedMap when the user enters materials used
+        setState(() {
+          complaint.materialUsed = value;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Materials Used for Complaint: }',
+      ),
+    );
+  }
+
+  // Function to generate PDF report for selected complaints
+  Future<void> _generatePDFReport() async {
+    final pdf = pw.Document();
+
+    for (var complaint in selectedComplaints.keys) {
+      pdf.addPage(
+        pw.Page(
+          build: (context) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Complaint: ${complaint['complaint']}',
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.Text(
+                  'Materials Used: ${materialsUsedMap[complaint.id] ?? 'N/A'}'),
+              // Add more details as needed
+            ],
+          ),
+        ),
+      );
+    }
+
+    final output = await getExternalStorageDirectory();
+    final file = File("${output?.path}/complaints_report.pdf");
+    // Await the result of pdf.save() and use it to write to the file
+    final Uint8List pdfBytes = await pdf.save();
+    await file.writeAsBytes(pdfBytes);
+  }
+
   void _buildProfileDialog(BuildContext context, String name, String type) {
     showDialog(
       context: context,
@@ -147,13 +266,37 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
     );
   }
 
+  // Widget to build checkbox for complaint selection
+  Widget _buildComplaintCheckbox(DocumentSnapshot complaint) {
+    return Checkbox(
+      value: selectedComplaints[complaint]?.value ?? false,
+      onChanged: (newValue) {
+        _toggleComplaintSelection(complaint);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (facultyType == null && staffType == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Faculty Home Page'),
-        ),
+            automaticallyImplyLeading: false,
+            title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () => _logout(context),
+                  ),
+                  Text(
+                    'Faculty Home Page',
+                    style: TextStyle(
+                      color: Colors.white, // Set the title text color to white
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ])),
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -209,6 +352,15 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Open dialog for materials input and generate PDF
+          _updateMaterialsUsedMap();
+          _showMaterialInputDialog(context);
+        },
+        tooltip: 'Generate PDF Report',
+        child: Icon(Icons.picture_as_pdf),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
             .collection('complaints')
@@ -219,8 +371,20 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          List<DocumentSnapshot> complaints =
-              snapshot.data!.docs.where((complaint) {
+          List<DataColumn> columns = [
+            DataColumn(label: Text('Complaint')),
+            DataColumn(label: Text('Complaint from')),
+            DataColumn(label: Text('Roll')),
+            DataColumn(label: Text('Hostel Number')),
+            DataColumn(label: Text('Room Number')),
+            DataColumn(label: Text('Phone Number')),
+            DataColumn(label: Text('Date')),
+            DataColumn(label: Text('Addressed')),
+            DataColumn(label: Text('Seen')),
+            DataColumn(label: Text('Select')),
+          ];
+
+          List<DataRow> rows = snapshot.data!.docs.where((complaint) {
             String complaintType = complaint['type'];
 
             if (facultyType == 'Chiefwarden' &&
@@ -242,77 +406,79 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                 staffType == complaintType) {
               return true;
             } else if (staffType == 'Hostel Incharge') {
-              if (staffHostelNumber.isNotEmpty &&
-                  staffHostelNumber == complaint['hostelNumber']) {
-                return true;
-              }
+              return staffHostelNumber.isNotEmpty &&
+                  staffHostelNumber == complaint['hostelNumber'];
             }
+
             return false;
-          }).toList();
+          }).map((complaint) {
+            bool seen =
+                (complaint.data() as Map<String, dynamic>).containsKey('seen')
+                    ? complaint['seen']
+                    : false;
+            bool addressed = (complaint.data() as Map<String, dynamic>)
+                    .containsKey('addressed')
+                ? complaint['addressed']
+                : false;
+            bool isSelected = selectedComplaintsList
+                .any((selection) => selection.complaint.id == complaint.id);
 
-          return ListView.builder(
-            itemCount: complaints.length,
-            itemBuilder: (context, index) {
-              DocumentSnapshot complaint = complaints[index];
-              bool seen =
-                  (complaint.data() as Map<String, dynamic>).containsKey('seen')
-                      ? complaint['seen']
-                      : false;
-              bool addressed = (complaint.data() as Map<String, dynamic>)
-                      .containsKey('addressed')
-                  ? complaint['addressed']
-                  : false;
-
-              return ListTile(
-                title: Text(
-                  'Complaint: ${complaint['complaint']}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: RichText(
-                  text: TextSpan(
-                    style: DefaultTextStyle.of(context).style,
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: 'Complaint from ${complaint['name']}\n',
-                      ),
-                      TextSpan(
-                        text: 'Roll: ${complaint['roll']}\n'
-                            'Hostel Number: ${complaint['hostelNumber']}\n'
-                            'Room Number: ${complaint['roomNumber']}\n'
-                            'Phone Number: ${complaint['phoneNumber']}\n'
-                            'date: ${_formatTimestamp(complaint['date'])}\n'
-                            'Addressed: ',
-                      ),
-                      TextSpan(
-                        text: '${addressed ? 'Yes' : 'No'}',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: addressed ? Colors.green : Colors.red),
-                      ),
-                    ],
+            return DataRow(
+              cells: [
+                DataCell(Text(complaint['complaint'].toString())),
+                DataCell(Text(complaint['name'].toString())),
+                DataCell(Text(complaint['roll'].toString())),
+                DataCell(Text(complaint['hostelNumber'].toString())),
+                DataCell(Text(complaint['roomNumber'].toString())),
+                DataCell(Text(complaint['phoneNumber'].toString())),
+                DataCell(Text(
+                    _formatTimestamp(complaint['date'] ?? Timestamp.now()))),
+                DataCell(Text(addressed ? 'Yes' : 'No')),
+                DataCell(
+                  Checkbox(
+                    value: seen,
+                    onChanged: (value) {
+                      _markAsSeen(complaint);
+                    },
                   ),
                 ),
-                trailing: IconButton(
-                  icon: Icon(
-                      seen ? Icons.check_box : Icons.check_box_outline_blank),
-                  onPressed: () => _markAsSeen(complaint),
+                DataCell(
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (value) {
+                      _toggleComplaintSelection(complaint);
+                    },
+                  ),
                 ),
-              );
-            },
+              ],
+            );
+          }).toList();
+
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: columns,
+              rows: rows,
+            ),
           );
         },
       ),
     );
   }
 
-  _formatTimestamp(String timestamp) {
-    if (timestamp.isNotEmpty) {
-      DateTime dateTime = DateTime.parse(timestamp);
-      String formattedDate =
-          '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
-      return ': $formattedDate';
-    } else {
-      return ': No timestamp';
-    }
+  _formatTimestamp(Timestamp timestamp) {
+    DateTime dateTime = timestamp.toDate();
+    String formattedDate =
+        '${dateTime.year}-${dateTime.month}-${dateTime.day} ${dateTime.hour}:${dateTime.minute}';
+    return ': $formattedDate';
   }
+}
+
+class _ComplaintSelection {
+  final DocumentSnapshot complaint;
+  ValueNotifier<bool> isSelected;
+  String? materialUsed;
+
+  _ComplaintSelection({required this.complaint})
+      : isSelected = ValueNotifier<bool>(false);
 }

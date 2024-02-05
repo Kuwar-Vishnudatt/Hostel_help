@@ -153,7 +153,7 @@ class _GeneralComplaintPageState extends State<GeneralComplaintPage> {
                             'complaint': complaint,
                             'seen': false,
                             'addressed': false,
-                            'date': timestamp,
+                            'date': FieldValue.serverTimestamp(),
                             'type': type,
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
