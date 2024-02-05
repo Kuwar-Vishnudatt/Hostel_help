@@ -206,7 +206,8 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
         });
       },
       decoration: InputDecoration(
-        labelText: 'Materials Used for Complaint: }',
+        labelText:
+            'Materials Used for Complaint: ${complaint.complaint['complaint']}',
       ),
     );
   }
