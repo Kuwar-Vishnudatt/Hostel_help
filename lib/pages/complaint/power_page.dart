@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PowerComplaintPage extends StatefulWidget {
   const PowerComplaintPage({super.key});
@@ -114,64 +116,7 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
                         Color.fromARGB(255, 27, 27, 27), // Dark grey color
                   ),
                   onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      // If the form is valid, display a Snackbar and send the complaint to the other frontend
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Processing Data')),
-                      );
-                      // Send the complaint to the other frontend
-                      final user = _auth.currentUser;
-                      final todayDate = DateTime.now();
-                      final timestamp = DateTime(
-                              todayDate.year, todayDate.month, todayDate.day)
-                          .toIso8601String();
-
-                      if (user != null) {
-                        final userData = await _firestore
-                            .collection('users')
-                            .doc(user.uid)
-                            .get();
-                        final name = userData['name'];
-                        final roll = userData['roll'];
-                        final hostelNumber = userData['hostelNumber'];
-                        final roomNumber = userData['roomNumber'];
-
-                        final complaints = await _firestore
-                            .collection('complaints')
-                            .where('userId', isEqualTo: user.uid)
-                            .where('date', isEqualTo: timestamp)
-                            .where('type', isEqualTo: type)
-                            .get();
-
-                        if (complaints.docs.isEmpty) {
-                          await _firestore.collection('complaints').add({
-                            'userId': user.uid,
-                            'name': name,
-                            'roll': roll,
-                            'hostelNumber': hostelNumber,
-                            'roomNumber': roomNumber,
-                            'phoneNumber': phoneNumber,
-                            'complaint': complaint,
-                            'seen': false,
-                            'addressed': false,
-                            'date': FieldValue.serverTimestamp(),
-                            'type': type,
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Complaint registered')),
-                          );
-                          _formKey.currentState!.reset();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Already submitted a complaint today')),
-                          );
-                          _formKey.currentState!.reset();
-                        }
-                      }
-                    }
+                    await submitComplaint(phoneNumber, complaint, type);
                   },
                   child: const Text(
                     'Submit',
@@ -184,5 +129,99 @@ class _PowerComplaintPageState extends State<PowerComplaintPage> {
         ),
       ),
     );
+  }
+
+  Future<void> submitComplaint(
+      String phoneNumber, String complaint, String type) async {
+    final complaintsCollection =
+        FirebaseFirestore.instance.collection('complaints');
+    final user = FirebaseAuth.instance.currentUser;
+    final todayDate = DateTime.now();
+    final timestamp = DateTime(todayDate.year, todayDate.month, todayDate.day)
+        .toIso8601String();
+
+    if (user != null) {
+      final userData = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final name = userData['name'];
+      final roll = userData['roll'];
+      final hostelNumber = userData['hostelNumber'];
+      final roomNumber = userData['roomNumber'];
+
+      final complaints = await complaintsCollection
+          .where('userId', isEqualTo: user.uid)
+          .where('date', isEqualTo: timestamp)
+          .where('type', isEqualTo: type)
+          .get();
+
+      if (complaints.docs.isEmpty) {
+        final complaintRef = await complaintsCollection.add({
+          'userId': user.uid,
+          'name': name,
+          'roll': roll,
+          'hostelNumber': hostelNumber,
+          'roomNumber': roomNumber,
+          'phoneNumber': phoneNumber,
+          'complaint': complaint,
+          'seen': false,
+          'addressed': false,
+          'date': FieldValue.serverTimestamp(),
+          'type': type,
+        });
+
+        // Send a notification to the faculty responsible for this type of complaint
+        String powerFacultyFcmToken = 'fcm_token_here';
+        await sendNotificationToFaculty(powerFacultyFcmToken,
+            'New Power Complaint', 'A new power complaint has been submitted.');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Complaint registered')),
+        );
+        _formKey.currentState!.reset();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Already submitted a complaint today')),
+        );
+        _formKey.currentState!.reset();
+      }
+    }
+  }
+
+  Future<void> sendNotificationToFaculty(
+      String fcmToken, String title, String body) async {
+    try {
+      var response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAA0rx9LIw:APA91bGvbNK-V6762-Jvad_77XbXuobyAo1P9vTQBkExQ-wSaIbvcXcyu_Ce8yHYUHdNvxN6uuPqtXTKIztwkyRvWzHQlP6GM4-RElEzlvtT3xlDuBQ6_w0luab3pF5__CjUa68Pbki_',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{
+              'body': body,
+              'title': title,
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+            },
+            'to': fcmToken,
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        print('Notification sent successfully.');
+      } else {
+        print('Error sending notification: ${response.statusCode}');
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }

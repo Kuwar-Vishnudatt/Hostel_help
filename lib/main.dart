@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:hostel_help/pages/faculty/faculty_home_page.dart';
 import 'package:hostel_help/pages/main_screen.dart';
@@ -10,6 +12,8 @@ import 'auth_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await configureFirebase();
+  FirebaseMessaging.instance.getInitialMessage();
   runApp(MyApp());
 }
 
@@ -82,4 +86,40 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
+}
+
+Future<void> configureFirebase() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await FirebaseMessaging.instance.getInitialMessage().then((message) {
+    if (message != null) {
+      // Handle background message when the app is opened from a terminated state
+    }
+  });
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    // Handle foreground notifications
+    print('Foreground notification: ${message.notification?.title}');
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    // Handle when a notification is opened from the notification center or a tap on the notification
+    print('Notification opened: ${message.notification?.title}');
+  });
+
+  FirebaseMessaging.instance.requestPermission();
+
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  if (fcmToken != null) {
+    // Save the FCM token to your database or use it to send notifications
+    print('FCM token: $fcmToken');
+  }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Background notification: ${message.notification?.title}');
+  // Handle the background notification here
 }

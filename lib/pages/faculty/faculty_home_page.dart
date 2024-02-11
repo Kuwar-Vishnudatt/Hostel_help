@@ -7,8 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../auth_helper.dart';
 import '../main_screen.dart';
 
@@ -20,7 +23,10 @@ class FacultyHomePage extends StatefulWidget {
 }
 
 class _FacultyHomePageState extends State<FacultyHomePage> {
+  final FlutterLocalNotificationsPlugin localNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final _firestore = FirebaseFirestore.instance;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final _auth = FirebaseAuth.instance;
   String? facultyType;
   String? staffType;
@@ -33,10 +39,62 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
 
   @override
   void initState() {
+    const AndroidInitializationSettings androidInitializationSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    // const IOSInitializationSettings iosInitializationSettings =
+    //     IOSInitializationSettings();
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: androidInitializationSettings,
+      // iOS: iosInitializationSettings,
+    );
     super.initState();
     BackButtonInterceptor.add(myInterceptor);
     fetchFacultyType();
     fetchStaffDetails();
+    // Initialize Firebase Cloud Messaging
+    _initFirebaseCloudMessaging();
+    // Initialize FlutterLocalNotificationsPlugin
+    localNotificationsPlugin.initialize(initializationSettings);
+
+    // Handle incoming notifications when the app is in the foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+
+      if (notification != null && android != null) {
+        localNotificationsPlugin.show(
+          notification.hashCode,
+          notification.title!,
+          notification.body!,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'your_channel_id',
+              'your_channel_name',
+              importance: Importance.max,
+              priority: Priority.high,
+              showWhen: true,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
+  // Initialize Firebase Cloud Messaging
+  void _initFirebaseCloudMessaging() {
+    // Request permission for receiving notifications
+    _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Configure Firebase Cloud Messaging
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Handle incoming messages here
+      print('Received notification: ${message.notification?.title}');
+    });
   }
 
   @override
@@ -126,6 +184,13 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
         .update({'seen': true});
   }
 
+  TextStyle _getAddressedTextStyle(bool addressed) {
+    return TextStyle(
+      color: addressed ? Colors.green : Colors.red,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
   // Function to toggle selection of a complaint
   void _toggleComplaintSelection(DocumentSnapshot complaint) {
     setState(() {
@@ -177,7 +242,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                   child: const Text('Generate PDF'),
                   onPressed: () {
                     // Generate PDF with selected complaints and materials used
-                    _generatePDFReport();
+                    _generatePdf();
                     Navigator.of(context).pop();
                   },
                 ),
@@ -213,31 +278,80 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
   }
 
   // Function to generate PDF report for selected complaints
-  Future<void> _generatePDFReport() async {
+  Future<void> _generatePdf() async {
+    print('Generating PDF...');
     final pdf = pw.Document();
-
-    for (var complaint in selectedComplaints.keys) {
-      pdf.addPage(
-        pw.Page(
-          build: (context) => pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Complaint: ${complaint['complaint']}',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-              pw.Text(
-                  'Materials Used: ${materialsUsedMap[complaint.id] ?? 'N/A'}'),
-              // Add more details as needed
-            ],
-          ),
-        ),
-      );
+    final complaints = selectedComplaintsList
+        .where((complaint) => complaint.isSelected.value)
+        .toList();
+// Request the WRITE_EXTERNAL_STORAGE permission on Android
+    if (Platform.isAndroid) {
+      final permission = Permission.storage;
+      if (!(await permission.isGranted)) {
+        try {
+          await permission.request();
+        } catch (e) {
+          print('Permission not granted: $e');
+        }
+      }
     }
+    pdf.addPage(pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          children: [
+            pw.Text('Hostel Management App', style: pw.TextStyle(fontSize: 24)),
+            pw.Text('PDF Report', style: pw.TextStyle(fontSize: 18)),
+            pw.SizedBox(height: 20),
+            pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                pw.TableRow(
+                  children: [
+                    pw.Text('Complaint'),
+                    pw.Text('Name'),
+                    pw.Text('Roll'),
+                    pw.Text('Hostel Number'),
+                    pw.Text('Room Number'),
+                    pw.Text('Phone Number'),
+                    pw.Text('Date'),
+                    pw.Text('Resolved'),
+                    pw.Text('Material Used'),
+                  ],
+                ),
+                ...complaints.map((complaint) {
+                  return pw.TableRow(
+                    children: [
+                      pw.Text(complaint.complaint['complaint'].toString()),
+                      pw.Text(complaint.complaint['name'].toString()),
+                      pw.Text(complaint.complaint['roll'].toString()),
+                      pw.Text(complaint.complaint['hostelNumber'].toString()),
+                      pw.Text(complaint.complaint['roomNumber'].toString()),
+                      pw.Text(complaint.complaint['phoneNumber'].toString()),
+                      pw.Text(_formatTimestamp(
+                          complaint.complaint['date'] ?? Timestamp.now())),
+                      pw.Text(complaint.complaint['addressed'] ? 'Yes' : 'No'),
+                      pw.Text(complaint.materialUsed ?? ''),
+                    ],
+                  );
+                }).toList(),
+              ],
+            ),
+          ],
+        );
+      },
+    ));
 
-    final output = await getExternalStorageDirectory();
-    final file = File("${output?.path}/complaints_report.pdf");
-    // Await the result of pdf.save() and use it to write to the file
+    final directory = await getExternalStorageDirectory();
+    final path = directory!.path;
     final Uint8List pdfBytes = await pdf.save();
-    await file.writeAsBytes(pdfBytes);
+    final List<int> pdfList = pdfBytes.toList();
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final file = File(
+        '$path/report_$timestamp.pdf'); // Use the correct path for the external storage directory
+    await file.writeAsBytes(pdfList);
+
+    Fluttertoast.showToast(msg: 'PDF Report Generated Successfully');
   }
 
   void _buildProfileDialog(BuildContext context, String name, String type) {
@@ -263,16 +377,6 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             ),
           ],
         );
-      },
-    );
-  }
-
-  // Widget to build checkbox for complaint selection
-  Widget _buildComplaintCheckbox(DocumentSnapshot complaint) {
-    return Checkbox(
-      value: selectedComplaints[complaint]?.value ?? false,
-      onChanged: (newValue) {
-        _toggleComplaintSelection(complaint);
       },
     );
   }
@@ -380,7 +484,7 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
             DataColumn(label: Text('Room Number')),
             DataColumn(label: Text('Phone Number')),
             DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Addressed')),
+            DataColumn(label: Text('Resolved')),
             DataColumn(label: Text('Seen')),
             DataColumn(label: Text('Select')),
           ];
@@ -434,7 +538,12 @@ class _FacultyHomePageState extends State<FacultyHomePage> {
                 DataCell(Text(complaint['phoneNumber'].toString())),
                 DataCell(Text(
                     _formatTimestamp(complaint['date'] ?? Timestamp.now()))),
-                DataCell(Text(addressed ? 'Yes' : 'No')),
+                DataCell(
+                  Text(
+                    addressed ? 'Yes' : 'No',
+                    style: _getAddressedTextStyle(addressed),
+                  ),
+                ),
                 DataCell(
                   Checkbox(
                     value: seen,
